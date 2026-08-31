@@ -1,0 +1,86 @@
+services:
+  nodejs:
+    image: node:20-bookworm
+    container_name: node_pm2_app
+    working_dir: /app
+    
+    init: true
+
+    shm_size: "2gb"
+
+    volumes:
+      - .:/app
+
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+
+    env_file:
+      - .env
+
+    environment:
+      PUPPETEER_SKIP_DOWNLOAD: "false"
+
+    depends_on:
+      - postgres
+      - keydb
+
+    command: >
+      sh -c "
+      apt-get update &&
+      apt-get install -y --no-install-recommends
+      fonts-noto
+      fonts-lohit-gujr
+      libnss3
+      libatk-bridge2.0-0
+      libatk1.0-0
+      libgtk-3-0
+      libgbm1
+      libasound2
+      libx11-xcb1
+      libxcomposite1
+      libxdamage1
+      libxrandr2
+      libxkbcommon0
+      libxshmfence1
+      libdrm2
+      libxfixes3
+      libglib2.0-0
+      libpango-1.0-0
+      libpangocairo-1.0-0
+      libcairo2
+      xdg-utils &&
+      npm install &&
+      npx puppeteer browsers install chrome &&
+      npm run build &&
+      npm start
+      "
+
+    restart: always
+
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: aniraj_vardhi
+      POSTGRES_PASSWORD: A9!vR7#pL2@xQ8mD
+      POSTGRES_DB: aniraj_vardhi
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  keydb:
+    image: eqalpha/keydb
+    container_name: keydb_cache
+    restart: always
+    command: keydb-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - keydb_data:/data
+
+volumes:
+  postgres_data:
+  keydb_data:

@@ -1,0 +1,2195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                     String                  @id @default(uuid())
+  company_name           String
+  plan                   Plan                    @default(BASIC)
+  status                 CompanyStatus           @default(ACTIVE)
+  slug                   String                  @unique
+  logo                   String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  address                String?
+  gstin_uin              String?
+  state_name             String?
+  state_code             String?
+  contact                String?
+  hsn_sac                String?
+  bill_to                String?
+  buyer_name             String?
+  buyer_address          String?
+  buyer_gstin_uin        String?
+  buyer_state_name       String?
+  buyer_state_code       String?
+  cgst_rate              Float?
+  sgst_rate              Float?
+  income_tax_rate        Float?
+  labour_cess_rate       Float?
+  cgst_tds_rate          Float?
+  sgst_tds_rate          Float?
+  additional_deposit     Float?
+  bank_name              String?
+  branch_name            String?
+  ifsc_code              String?
+  swift_code             String?
+  account_no             String?
+  account_holder_name    String?
+  module_access          Json?                  @map("module_access")
+  approved_by_ranges     Json?                  @map("approved_by_ranges")
+  ayMasters              AYMaster[]
+  accounts               Account[]
+  attendances            Attendance[]
+  bankTransactions       BankBookTransaction[]
+  belongingsTransfers    BelongingsTransfer[]
+  capitalSOR             CapitalSOR[]
+  capitalSorPrices       CapitalSORPrice[]
+  cashBooks              CashBook[]
+  cashTransactions       CashBookTransaction[]
+  chequePrints           ChequePrint[]
+  departments            Department[]
+  documents              Document[]
+  employees              Employee[]
+  employeePrices         EmployeePrice[]
+  itemManagements        ItemManagement[]
+  itemMasters            ItemMaster[]
+  itemWorkTypePrices     ItemWorkTypePrice[]
+  locations              Location[]
+  Material               Material[]
+  MaterialPrefix         MaterialPrefix[]
+  MaterialPriceHistory   MaterialPriceHistory[]
+  modulePermissions      ModulePermission[]
+  parties                Party[]
+  partySupplierItemPrices PartySupplierItemPrice[]
+  projects               Project[]
+  projectDeposits        ProjectDeposit[]
+  projectDocuments       ProjectDocument[]
+  projectPhotoStages     ProjectPhotoStage[]
+  projectPhotos          ProjectPhoto[]
+  projectLocations       ProjectLocation[]
+  projectStatusTrackings ProjectStatusTracking[]
+  projectWorkTypes       ProjectWorkType[]
+  purchaseEntries        PurchaseEntry[]
+  purchaseEntryLocations PurchaseEntryLocation[]
+  purchaseEntryMaterials PurchaseEntryMaterial[]
+
+  soritems                    SORItem[]
+  subcontractors              Subcontractor[]
+  subcontractorRates          SubcontractorRate[]
+  tasks                       Task[]
+  tempProjectDocuments        TempProjectDocument[]
+  negotiationPrices           NegotiationPrice[]
+  units                       Unit[]
+  users                       User[]
+  vardhis                     Vardhi[]
+  vardhiAdditionalItems       VardhiAdditionalItem[]
+  vardhiEmployees             VardhiEmployee[]
+  vardhiEstimations           VardhiEstimation[]
+  vardhiEstimationItems       VardhiEstimationItem[]
+  vardhiExpenses              VardhiExpense[]
+  vardhiInvoices              VardhiInvoice[]
+  vardhiItems                 VardhiItem[]
+  vardhiWaterWorksDepartments VardhiWaterWorksDepartment[]
+  workTypes                   WorkType[]
+  zoneMasters                 ZoneMaster[]
+  activities                  Activity[]                   @relation("CompanyActivities")
+  projectAreas                ProjectArea[]
+  projectItems                ProjectItem[]
+  sorGroups                   SORGroup[]
+  correspondence              Correspondence[]
+  designations                Designation[]
+  leaveTypes                  LeaveType[]
+  leaveRequests               LeaveRequest[]
+  holidays                    Holiday[]
+  jobs                        Job[]
+  candidates                  Candidate[]
+  performanceReviews          PerformanceReview[]
+  employeeDocuments           EmployeeDocument[]
+  announcements               Announcement[]
+  payrollSalaryComponents     PayrollSalaryComponent[]
+  payrollFinancialYears       PayrollFinancialYear[]
+  employeeSalaries            EmployeeSalary[]
+  payrollRuns                 PayrollRun[]
+  reimbursementTypes          ReimbursementType[]
+  reimbursementRequests       ReimbursementRequest[]
+  loans                       Loan[]
+  ledgers                     Ledger[]
+
+  @@map("Company")
+}
+
+model Employee {
+  id                         String    @id @default(uuid())
+  company_id                 String    @map("company_id")
+  employee_code              String?   @map("employee_code")
+  first_name                String?          @map("first_name")
+  last_name                  String?   @map("last_name")
+  middle_name                String?   @map("middle_name")
+  email                      String?   @map("email")
+  phone                      String?   @map("phone")
+  alternate_phone            String?   @map("alternate_phone")
+  gender                     String?   @map("gender")
+  date_of_birth              DateTime? @map("date_of_birth")
+  blood_group                String?   @map("blood_group")
+  marital_status             String?   @map("marital_status")
+  nationality                String?   @map("nationality")
+  photo                      String?   @map("photo")
+  address                    String?   @map("address")
+  city                       String?   @map("city")
+  state                      String?   @map("state")
+  country                    String?   @map("country")
+  pincode                    String?   @map("pincode")
+  name                       String
+  department_id              String?   @map("department_id")
+  designation_id             String?   @map("designation_id")
+  joining_date               DateTime? @map("joining_date")
+  confirmation_date          DateTime? @map("confirmation_date")
+  employment_type            String?   @map("employment_type")
+  shift                      String?   @map("shift")
+  reporting_manager          String?   @map("reporting_manager")
+  work_location              String?   @map("work_location")
+  aadhaar                    String?   @map("aadhaar")
+  pan                        String?   @map("pan")
+  passport                   String?   @map("passport")
+  driving_license            String?   @map("driving_license")
+  account_holder_name        String?   @map("account_holder_name")
+  bank_name                  String?   @map("bank_name")
+  account_number             String?   @map("account_number")
+  ifsc_code                  String?   @map("ifsc_code")
+  branch                     String?   @map("branch")
+  emergency_contact_name     String?   @map("emergency_contact_name")
+  emergency_contact_relation String?   @map("emergency_contact_relation")
+  emergency_contact_phone    String?   @map("emergency_contact_phone")
+  status                     String?   @default("ACTIVE")
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+
+  company                 Company             @relation(fields: [company_id], references: [id])
+  department              Department?         @relation("EmployeeDepartment", fields: [department_id], references: [id])
+  designation             Designation?        @relation(fields: [designation_id], references: [id])
+  prices                  EmployeePrice[]
+  vardhiEmployees         VardhiEmployee[]
+  purchaseEntriesReceived PurchaseEntry[]     @relation("PurchaseEntry_received_byToEmployee")
+  leaveRequests           LeaveRequest[]
+  documents               EmployeeDocument[]
+  performanceReviews      PerformanceReview[]
+  employeeSalaries        EmployeeSalary[]
+  payrollItems            PayrollItem[]
+  payslips                Payslip[]
+  reimbursementRequests   ReimbursementRequest[]
+  loans                   Loan[]
+
+  @@index([company_id])
+  @@index([name])
+  @@index([department_id])
+  @@index([designation_id])
+  @@index([employee_code])
+  @@index([status])
+}
+
+model Subcontractor {
+  id         String              @id @default(uuid())
+  company_id String              @map("company_id")
+  name       String
+  unit_id    String?             @map("unit_id")
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  capitalSOR CapitalSOR[]
+  company    Company             @relation(fields: [company_id], references: [id])
+  rates      SubcontractorRate[]
+  unit       Unit?               @relation(fields: [unit_id], references: [id])
+
+  @@index([company_id])
+  @@index([name])
+}
+
+model SubcontractorRate {
+  id               String        @id @default(uuid())
+  company_id       String        @map("company_id")
+  subcontractor_id String        @map("subcontractor_id")
+  rate             Decimal       @db.Decimal(12, 2)
+  start_date       DateTime      @default(now()) @map("start_date")
+  expiry_date      DateTime?     @map("expiry_date")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  company          Company       @relation(fields: [company_id], references: [id])
+  subcontractor    Subcontractor @relation(fields: [subcontractor_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([subcontractor_id])
+  @@index([subcontractor_id, start_date, expiry_date])
+}
+
+model EmployeePrice {
+  id          String    @id @default(uuid())
+  company_id  String    @map("company_id")
+  employee_id String    @map("employee_id")
+  price       Decimal   @db.Decimal(18, 2)
+  start_date  DateTime  @default(now()) @map("start_date")
+  expiry_date DateTime? @map("expiry_date")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  company     Company   @relation(fields: [company_id], references: [id])
+  employee    Employee  @relation(fields: [employee_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([employee_id])
+  @@index([employee_id, start_date, expiry_date])
+}
+
+model Department {
+  id           String        @id @default(uuid())
+  company_id   String        @map("company_id")
+  name         String
+  code         String?       @map("code")
+  manager_name String?       @map("manager_name")
+  phone        String?       @map("phone")
+  email        String?       @map("email")
+  description  String?       @map("description")
+  status       String?       @default("ACTIVE")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  company      Company       @relation(fields: [company_id], references: [id])
+  itemMasters  ItemMaster[]
+  employees    Employee[]    @relation("EmployeeDepartment")
+  designations Designation[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+}
+
+model Designation {
+  id            String      @id @default(uuid())
+  company_id    String      @map("company_id")
+  department_id String?     @map("department_id")
+  name          String
+  level         Int?        @map("level")
+  description   String?     @map("description")
+  status        String?     @default("ACTIVE")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  company       Company     @relation(fields: [company_id], references: [id])
+  department    Department? @relation(fields: [department_id], references: [id])
+  employees     Employee[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+  @@index([department_id])
+}
+
+model LeaveType {
+  id            String         @id @default(uuid())
+  company_id    String         @map("company_id")
+  name          String
+  days          Int            @default(0)
+  carry_forward Boolean        @default(false) @map("carry_forward")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  company       Company        @relation(fields: [company_id], references: [id])
+  leaveRequests LeaveRequest[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+}
+
+model LeaveRequest {
+  id            String    @id @default(uuid())
+  company_id    String    @map("company_id")
+  employee_id   String    @map("employee_id")
+  leave_type_id String    @map("leave_type_id")
+  from_date     DateTime  @map("from_date")
+  to_date       DateTime  @map("to_date")
+  reason        String?   @map("reason")
+  status        String    @default("PENDING")
+  approved_by   String?   @map("approved_by")
+  remarks       String?   @map("remarks")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  company       Company   @relation(fields: [company_id], references: [id])
+  employee      Employee  @relation(fields: [employee_id], references: [id])
+  leaveType     LeaveType @relation(fields: [leave_type_id], references: [id])
+
+  @@index([company_id])
+  @@index([employee_id])
+  @@index([leave_type_id])
+  @@index([status])
+}
+
+model Holiday {
+  id          String   @id @default(uuid())
+  company_id  String   @map("company_id")
+  title       String
+  date        DateTime
+  type        String?  @default("PUBLIC")
+  description String?  @map("description")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+  @@index([date])
+}
+
+model Job {
+  id           String      @id @default(uuid())
+  company_id   String      @map("company_id")
+  title        String
+  department   String?     @map("department")
+  vacancy      Int?        @default(1)
+  experience   String?     @map("experience")
+  salary_range String?     @map("salary_range")
+  location     String?     @map("location")
+  status       String?     @default("OPEN")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  company      Company     @relation(fields: [company_id], references: [id])
+  candidates   Candidate[]
+
+  @@index([company_id])
+  @@index([status])
+}
+
+model Candidate {
+  id         String   @id @default(uuid())
+  company_id String   @map("company_id")
+  job_id     String?  @map("job_id")
+  name       String
+  email      String?  @map("email")
+  phone      String?  @map("phone")
+  resume     String?  @map("resume")
+  status     String?  @default("APPLIED")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  company    Company  @relation(fields: [company_id], references: [id])
+  job        Job?     @relation(fields: [job_id], references: [id])
+
+  @@index([company_id])
+  @@index([job_id])
+  @@index([status])
+}
+
+model PerformanceReview {
+  id           String   @id @default(uuid())
+  company_id   String   @map("company_id")
+  employee_id  String   @map("employee_id")
+  reviewer     String?  @map("reviewer")
+  rating       Int?     @map("rating")
+  goals        String?  @map("goals")
+  achievements String?  @map("achievements")
+  comments     String?  @map("comments")
+  review_date  DateTime @default(now()) @map("review_date")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  company      Company  @relation(fields: [company_id], references: [id])
+  employee     Employee @relation(fields: [employee_id], references: [id])
+
+  @@index([company_id])
+  @@index([employee_id])
+}
+
+model EmployeeDocument {
+  id            String    @id @default(uuid())
+  company_id    String    @map("company_id")
+  employee_id   String    @map("employee_id")
+  document_name String    @map("document_name")
+  file          String?   @map("file")
+  expiry_date   DateTime? @map("expiry_date")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  company       Company   @relation(fields: [company_id], references: [id])
+  employee      Employee  @relation(fields: [employee_id], references: [id])
+
+  @@index([company_id])
+  @@index([employee_id])
+}
+
+model Document {
+  id                   String   @id @default(uuid())
+  company_id           String   @map("company_id")
+  document_name        String   @map("document_name")
+  expire_date          DateTime @map("expire_date")
+  file                 String?  @map("file")
+  file_type            String?  @map("file_type")
+  reminder_date        DateTime @map("reminder_date")
+  reminder_enabled     Boolean  @default(true) @map("reminder_enabled")
+  reminder_days_before Int?     @map("reminder_days_before")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  company              Company  @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+}
+
+model Announcement {
+  id           String    @id @default(uuid())
+  company_id   String    @map("company_id")
+  title        String
+  description  String?   @map("description")
+  publish_date DateTime  @default(now()) @map("publish_date")
+  expiry_date  DateTime? @map("expiry_date")
+  priority     String?   @default("NORMAL")
+  status       String?   @default("ACTIVE")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  company      Company   @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+  @@index([status])
+}
+
+// ──────────────────────────────────────────────
+// PAYROLL MODULE
+// ──────────────────────────────────────────────
+
+model PayrollSalaryComponent {
+  id               String   @id @default(uuid())
+  company_id       String   @map("company_id")
+  code             String?  @map("code")       // stable key e.g. BASIC, HRA, PF, TDS
+  name             String
+  type             String   @default("EARNING") // EARNING / DEDUCTION
+  calculation_type String   @default("FIXED")   // FIXED / PERCENTAGE
+  default_value    Float?   @default(0)
+  percentage_of_id String?  @map("percentage_of_id")
+  is_active        Boolean  @default(true)
+  is_standard      Boolean  @default(false) @map("is_standard")
+  sort_order       Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company         Company                    @relation(fields: [company_id], references: [id])
+  percentageOf    PayrollSalaryComponent?    @relation("SalaryComponentPercentageOf", fields: [percentage_of_id], references: [id])
+  percentageOfFor PayrollSalaryComponent[]   @relation("SalaryComponentPercentageOf")
+  salaryComponents     EmployeeSalaryComponent[]
+  payrollItemComponents PayrollItemComponent[]
+
+  @@unique([company_id, name])
+  @@unique([company_id, code])
+  @@index([company_id])
+  @@index([type])
+  @@map("payroll_salary_components")
+}
+
+model PayrollFinancialYear {
+  id         String   @id @default(uuid())
+  company_id String   @map("company_id")
+  name       String   // e.g., "2025-2026"
+  start_date DateTime @map("start_date")
+  end_date   DateTime @map("end_date")
+  is_closed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  company     Company         @relation(fields: [company_id], references: [id])
+  periods     PayrollPeriod[]
+  payrollRuns PayrollRun[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+  @@map("payroll_financial_years")
+}
+
+model PayrollPeriod {
+  id                String   @id @default(uuid())
+  financial_year_id String   @map("financial_year_id")
+  month             Int      // 1-12
+  year              Int      // e.g., 2025
+  start_date        DateTime @map("start_date")
+  end_date          DateTime @map("end_date")
+  is_processed      Boolean  @default(false)
+  is_closed         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  financialYear PayrollFinancialYear @relation(fields: [financial_year_id], references: [id])
+  payrollRuns   PayrollRun[]
+
+  @@unique([financial_year_id, month, year])
+  @@index([financial_year_id])
+  @@map("payroll_periods")
+}
+
+model EmployeeSalary {
+  id             String   @id @default(uuid())
+  company_id     String   @map("company_id")
+  employee_id    String   @map("employee_id")
+  effective_from DateTime? @map("effective_from")
+  effective_to   DateTime? @map("effective_to")
+  gross_salary   Float?   @default(0) @map("gross_salary")
+  status         String   @default("ACTIVE") // ACTIVE / INACTIVE
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  company    Company                  @relation(fields: [company_id], references: [id])
+  employee   Employee                 @relation(fields: [employee_id], references: [id])
+  components EmployeeSalaryComponent[]
+
+  @@index([company_id])
+  @@index([employee_id])
+  @@index([status])
+  @@map("employee_salaries")
+}
+
+model EmployeeSalaryComponent {
+  id                 String   @id @default(uuid())
+  employee_salary_id String   @map("employee_salary_id")
+  salary_component_id String  @map("salary_component_id")
+  amount             Float?   @default(0)
+  percentage         Float?   @default(0)
+  calculation_type   String   @default("FIXED") // FIXED / PERCENTAGE
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  employeeSalary  EmployeeSalary        @relation(fields: [employee_salary_id], references: [id], onDelete: Cascade)
+  salaryComponent PayrollSalaryComponent @relation(fields: [salary_component_id], references: [id])
+
+  @@index([employee_salary_id])
+  @@index([salary_component_id])
+  @@map("employee_salary_components")
+}
+
+model PayrollRun {
+  id               String   @id @default(uuid())
+  company_id       String   @map("company_id")
+  financial_year_id String  @map("financial_year_id")
+  period_id         String   @map("period_id")
+  process_date     DateTime @default(now()) @map("process_date")
+  total_employees  Int      @default(0)
+  total_gross      Float    @default(0)
+  total_earnings   Float    @default(0)
+  total_deductions Float    @default(0)
+  total_net        Float    @default(0)
+  status           String   @default("DRAFT") // DRAFT / PROCESSED / FINALIZED
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company        Company          @relation(fields: [company_id], references: [id])
+  financialYear  PayrollFinancialYear @relation(fields: [financial_year_id], references: [id])
+  period         PayrollPeriod    @relation(fields: [period_id], references: [id])
+  payrollItems   PayrollItem[]
+  payslips       Payslip[]
+  loanRepayments LoanRepayment[]
+
+  @@index([company_id])
+  @@index([financial_year_id])
+  @@index([period_id])
+  @@index([status])
+  @@map("payroll_runs")
+}
+
+model PayrollItem {
+  id               String   @id @default(uuid())
+  payroll_run_id   String   @map("payroll_run_id")
+  employee_id      String   @map("employee_id")
+  employee_salary_id String? @map("employee_salary_id")
+  gross_salary     Float    @default(0)
+  total_earnings   Float    @default(0)
+  total_deductions Float    @default(0)
+  net_pay          Float    @default(0)
+  status           String   @default("COMPUTED") // COMPUTED / CONFIRMED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  payrollRun   PayrollRun          @relation(fields: [payroll_run_id], references: [id], onDelete: Cascade)
+  employee     Employee            @relation(fields: [employee_id], references: [id])
+  components   PayrollItemComponent[]
+  payslip      Payslip?
+
+  @@index([payroll_run_id])
+  @@index([employee_id])
+  @@map("payroll_items")
+}
+
+model PayrollItemComponent {
+  id                 String   @id @default(uuid())
+  payroll_item_id    String   @map("payroll_item_id")
+  salary_component_id String  @map("salary_component_id")
+  amount             Float    @default(0)
+  type               String   // EARNING / DEDUCTION
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  payrollItem    PayrollItem            @relation(fields: [payroll_item_id], references: [id], onDelete: Cascade)
+  salaryComponent PayrollSalaryComponent @relation(fields: [salary_component_id], references: [id])
+
+  @@index([payroll_item_id])
+  @@index([salary_component_id])
+  @@map("payroll_item_components")
+}
+
+model Payslip {
+  id              String   @id @default(uuid())
+  payroll_item_id String   @unique @map("payroll_item_id")
+  employee_id     String   @map("employee_id")
+  payroll_run_id  String   @map("payroll_run_id")
+  payslip_number  String   @map("payslip_number")
+  generated_date  DateTime @default(now()) @map("generated_date")
+  pdf_path        String?  @map("pdf_path")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  payrollItem PayrollItem @relation(fields: [payroll_item_id], references: [id], onDelete: Cascade)
+  employee    Employee    @relation(fields: [employee_id], references: [id])
+  payrollRun  PayrollRun  @relation(fields: [payroll_run_id], references: [id])
+
+  @@index([employee_id])
+  @@index([payroll_run_id])
+  @@index([payslip_number])
+  @@map("payslips")
+}
+
+// ──────────────────────────────────────────────
+// REIMBURSEMENT MODULE
+// ──────────────────────────────────────────────
+
+model ReimbursementType {
+  id          String   @id @default(uuid())
+  company_id  String   @map("company_id")
+  name        String
+  description String?
+  is_active   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company           Company               @relation(fields: [company_id], references: [id])
+  reimbursementRequests ReimbursementRequest[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+  @@map("reimbursement_types")
+}
+
+model ReimbursementRequest {
+  id                     String   @id @default(uuid())
+  company_id             String   @map("company_id")
+  employee_id            String   @map("employee_id")
+  reimbursement_type_id  String   @map("reimbursement_type_id")
+  amount                 Float    @default(0)
+  description            String?
+  expense_date           DateTime @map("expense_date")
+  status                 String   @default("PENDING") // PENDING / APPROVED / REJECTED / PAID
+  approved_by            String?  @map("approved_by")
+  approved_at            DateTime? @map("approved_at")
+  paid_date              DateTime? @map("paid_date")
+  remarks                String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  company            Company            @relation(fields: [company_id], references: [id])
+  employee           Employee           @relation(fields: [employee_id], references: [id])
+  reimbursementType  ReimbursementType  @relation(fields: [reimbursement_type_id], references: [id])
+  attachments        ReimbursementAttachment[]
+
+  @@index([company_id])
+  @@index([employee_id])
+  @@index([status])
+  @@index([reimbursement_type_id])
+  @@map("reimbursement_requests")
+}
+
+model ReimbursementAttachment {
+  id                      String   @id @default(uuid())
+  reimbursement_request_id String  @map("reimbursement_request_id")
+  file_path               String   @map("file_path")
+  file_name               String   @map("file_name")
+  file_size               Int?     @default(0) @map("file_size")
+  mime_type               String?  @map("mime_type")
+  createdAt               DateTime @default(now())
+
+  reimbursementRequest ReimbursementRequest @relation(fields: [reimbursement_request_id], references: [id], onDelete: Cascade)
+
+  @@index([reimbursement_request_id])
+  @@map("reimbursement_attachments")
+}
+
+// ──────────────────────────────────────────────
+// LOAN / ADVANCE MODULE
+// ──────────────────────────────────────────────
+
+model Loan {
+  id                  String   @id @default(uuid())
+  company_id          String   @map("company_id")
+  employee_id         String   @map("employee_id")
+  loan_type           String   @default("LOAN") // LOAN / ADVANCE
+  amount              Float    @default(0)
+  emi_amount          Float    @default(0) @map("emi_amount")
+  total_installments  Int      @default(0)
+  paid_installments   Int      @default(0)
+  remaining_amount    Float    @default(0)
+  status              String   @default("ACTIVE") // ACTIVE / CLOSED
+  start_date          DateTime @map("start_date")
+  end_date            DateTime? @map("end_date")
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  company   Company         @relation(fields: [company_id], references: [id])
+  employee  Employee        @relation(fields: [employee_id], references: [id])
+  repayments LoanRepayment[]
+
+  @@index([company_id])
+  @@index([employee_id])
+  @@index([status])
+  @@map("loans")
+}
+
+model LoanRepayment {
+  id          String   @id @default(uuid())
+  loan_id     String   @map("loan_id")
+  payroll_run_id String? @map("payroll_run_id")
+  amount      Float    @default(0)
+  month       Int
+  year        Int
+  paid_at     DateTime? @map("paid_at")
+  createdAt   DateTime @default(now())
+
+  loan       Loan       @relation(fields: [loan_id], references: [id], onDelete: Cascade)
+  payrollRun PayrollRun? @relation(fields: [payroll_run_id], references: [id])
+
+  @@index([loan_id])
+  @@index([payroll_run_id])
+  @@map("loan_repayments")
+}
+
+model NegotiationPrice {
+  id         String    @id @default(uuid())
+  company_id String    @map("company_id")
+  name       String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  projects   Project[]
+  company    Company   @relation(fields: [company_id], references: [id])
+
+  @@unique([company_id, name])
+  @@index([company_id])
+}
+
+model VardhiInvoice {
+  id                     String           @id @default(uuid())
+  company_id             String           @map("company_id")
+  estimation_id          String
+  invoice_no             String           @unique
+  invoice_date           DateTime
+  dept_name              String?
+  dept_bill_no           String?
+  dept_bill_date         DateTime?
+  mb_no                  String?
+  mb_page_no             String?
+  ra_bill_no             String?
+  remarks                String?
+  company_name           String
+  company_address        String?
+  company_gstin          String?
+  company_state          String?
+  company_state_code     String?
+  company_contact        String?
+  buyer_name             String
+  buyer_address          String?
+  buyer_gstin            String?
+  buyer_state            String?
+  buyer_state_code       String?
+  description            String
+  hsn_sac                String?
+  quantity               Decimal          @db.Decimal(12, 2)
+  amount                 Decimal          @db.Decimal(12, 2)
+  total_amount           Decimal?         @db.Decimal(12, 2)
+  cgst_percent           Float?
+  cgst_amount            Decimal?         @db.Decimal(12, 2)
+  sgst_percent           Float?
+  sgst_amount            Decimal?         @db.Decimal(12, 2)
+  it_percent             Float?
+  it_amount              Decimal?         @db.Decimal(12, 2)
+  labour_cess_percent    Float?
+  labour_cess_amount     Decimal?         @db.Decimal(12, 2)
+  cgst_tds_percent       Float?
+  cgst_tds_amount        Decimal?         @db.Decimal(12, 2)
+  sgst_tds_percent       Float?
+  sgst_tds_amount        Decimal?         @db.Decimal(12, 2)
+  add_deposit_percent    Float?
+  add_deposit_amount     Decimal?         @db.Decimal(12, 2)
+  is_cgst_enabled        Boolean          @default(true)
+  is_sgst_enabled        Boolean          @default(true)
+  is_it_enabled          Boolean          @default(true)
+  is_labour_cess_enabled Boolean          @default(true)
+  is_cgst_tds_enabled    Boolean          @default(true)
+  is_sgst_tds_enabled    Boolean          @default(true)
+  is_add_deposit_enabled Boolean          @default(true)
+  account_holder_name    String?
+  bank_name              String?
+  account_no             String?
+  branch_name            String?
+  ifsc_code              String?
+  swift_code             String?
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @updatedAt
+  company                Company          @relation(fields: [company_id], references: [id])
+  estimation             VardhiEstimation @relation(fields: [estimation_id], references: [id])
+
+  @@index([company_id])
+  @@index([estimation_id])
+}
+
+model User {
+  id              String             @id @default(uuid())
+  company_id      String?            @map("company_id")
+  name            String
+  email           String             @unique
+  role            Role               @default(DataEntry)
+  password        String
+  profile_photo   String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  username        String?            @unique @map("username")
+  zone_id         String?            @map("zone_id")
+  whatsapp_number String?            @map("whatsapp_number")
+  permissions     ModulePermission[]
+  company         Company?           @relation(fields: [company_id], references: [id])
+  zone            ZoneMaster?        @relation("ZoneMasterToUsers", fields: [zone_id], references: [id])
+  activities      Activity[]         @relation("UserActivities")
+  notifications   Notification[]     @relation("UserNotifications")
+
+  @@index([zone_id])
+}
+
+model Unit {
+  id                    String                 @id @default(uuid())
+  company_id            String                 @map("company_id")
+  unit_name             String
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  itemManagements       ItemManagement[]       @relation("UnitItemManagement")
+  company               Company                @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  vardhiEstimationItems VardhiEstimationItem[] @relation("UnitVardhiEstimation")
+  subcontractors        Subcontractor[]
+
+  @@unique([company_id, unit_name])
+  @@index([company_id])
+  @@index([unit_name])
+}
+
+model ZoneMaster {
+  id         String        @id @default(uuid())
+  company_id String        @map("company_id")
+  file_no    Int           @default(autoincrement())
+  name       String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  users      User[]        @relation("ZoneMasterToUsers")
+  vardhis    Vardhi[]
+  zoneApproval ZoneApproval[]
+  company    Company       @relation(fields: [company_id], references: [id])
+  officers   ZoneOfficer[]
+
+  @@unique([company_id, file_no])
+}
+
+model ZoneOfficer {
+  id           String        @id @default(uuid())
+  zone_id      String        @map("zone_id")
+  officer_name String        @map("officer_name")
+  contact_no   String        @map("contact_no")
+  status       OfficerStatus
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  zone         ZoneMaster    @relation(fields: [zone_id], references: [id], onDelete: Cascade)
+
+  @@index([zone_id])
+}
+
+model AYMaster {
+  id                    String                 @id @default(uuid())
+  company_id            String                 @map("company_id")
+  ay_no                 String
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  company               Company                @relation(fields: [company_id], references: [id])
+  itemManagements       ItemManagement[]
+  vardhiEstimationItems VardhiEstimationItem[]
+
+  @@unique([company_id, ay_no])
+  @@index([company_id])
+  @@index([ay_no])
+}
+
+model ItemManagement {
+  id                    String                 @id @default(uuid())
+  company_id            String                 @map("company_id")
+  item_name             String
+  unit_id               String
+  ay_id                 String?
+  group_id              String?                @map("group_id")
+  work_type             Boolean                @default(false)
+  is_active             Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  ay                    AYMaster?              @relation(fields: [ay_id], references: [id])
+  company               Company                @relation(fields: [company_id], references: [id])
+  unit                  Unit                   @relation("UnitItemManagement", fields: [unit_id], references: [id])
+  searchPreferences     ItemSearchPreference[]
+  workTypePrices        ItemWorkTypePrice[]
+  vardhiAdditionalItems VardhiAdditionalItem[]
+  vardhiEstimationItems VardhiEstimationItem[]
+  vardhiItems           VardhiItem[]
+
+  @@unique([company_id, item_name])
+  @@index([company_id])
+  @@index([item_name])
+  @@index([work_type])
+  @@index([is_active])
+}
+
+model ItemWorkTypePrice {
+  id           String         @id @default(uuid())
+  company_id   String         @map("company_id")
+  item_id      String
+  work_type_id String
+  price        Decimal        @db.Decimal(18, 2)
+  start_date   DateTime       @default(now()) @map("start_date")
+  expiry_date  DateTime?      @map("expiry_date")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  company      Company        @relation(fields: [company_id], references: [id])
+  item         ItemManagement @relation(fields: [item_id], references: [id])
+  workType     WorkType       @relation(fields: [work_type_id], references: [id])
+
+  @@index([company_id])
+  @@index([item_id])
+  @@index([work_type_id])
+  @@index([item_id, start_date, expiry_date])
+}
+
+model Vardhi {
+  id                     String                 @id @default(uuid())
+  company_id             String                 @map("company_id")
+  zone_id                String
+  vardhi_number          String                 @unique
+  varshi_assign_by       String
+  date                   DateTime
+  location               String
+  vardhi_start_date      DateTime
+  vardhi_end_date        DateTime
+  work_type              String
+  report_pdf             String?
+  site_photography       String?
+  site_clear_photo       String?
+  other_attachment       String?
+  is_in_billing          Boolean                @default(false) @map("is_in_billing")
+  existing_items_total   Decimal                @default(0) @map("existing_items_total") @db.Decimal(15, 2)
+  employees_total        Decimal                @default(0) @map("employees_total") @db.Decimal(15, 2)
+  expenses_total         Decimal                @default(0) @map("expenses_total") @db.Decimal(15, 2)
+  additional_items_total Decimal                @default(0) @map("additional_items_total") @db.Decimal(15, 2)
+  grand_total            Decimal                @default(0) @map("grand_total") @db.Decimal(15, 2)
+  difference_total       Decimal                @default(0) @map("difference_total") @db.Decimal(15, 2)
+  created_at             DateTime               @default(now())
+  updated_at             DateTime               @updatedAt
+  global_sequence        Int                    @default(0) @map("global_sequence")
+  company                Company                @relation(fields: [company_id], references: [id])
+  zone                   ZoneMaster             @relation(fields: [zone_id], references: [id])
+  additionalItems        VardhiAdditionalItem[]
+  attachments            VardhiAttachment[]
+  employees              VardhiEmployee[]
+  expenses               VardhiExpense[]
+  vardhiItems            VardhiItem[]
+  estimations            VardhiEstimation[]     @relation("VardhiToVardhiEstimation")
+
+  @@index([company_id])
+  @@index([zone_id])
+  @@index([date])
+  @@index([vardhi_number])
+  @@index([work_type])
+  @@index([is_in_billing])
+  @@index([created_at])
+}
+
+model VardhiEmployee {
+  id             String   @id @default(uuid())
+  company_id     String   @map("company_id")
+  vardhi_id      String   @map("vardhi_id")
+  employee_id    String   @map("employee_id")
+  is_overtime    Boolean  @default(false) @map("is_overtime")
+  overtime_hours Decimal? @map("overtime_hours") @db.Decimal(5, 2)
+  rate           Decimal  @db.Decimal(18, 2)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  company        Company  @relation(fields: [company_id], references: [id])
+  employee       Employee @relation(fields: [employee_id], references: [id])
+  vardhi         Vardhi   @relation(fields: [vardhi_id], references: [id], onDelete: Cascade)
+
+  @@unique([vardhi_id, employee_id])
+  @@index([company_id])
+  @@index([vardhi_id])
+  @@index([employee_id])
+}
+
+model VardhiExpense {
+  id         String   @id @default(uuid())
+  company_id String   @map("company_id")
+  vardhi_id  String   @map("vardhi_id")
+  particular String
+  amount     Decimal  @db.Decimal(15, 2)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  company    Company  @relation(fields: [company_id], references: [id])
+  vardhi     Vardhi   @relation(fields: [vardhi_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([vardhi_id])
+}
+
+model VardhiAdditionalItem {
+  id         String          @id @default(uuid())
+  company_id String          @map("company_id")
+  vardhi_id  String          @map("vardhi_id")
+  item_id    String?         @map("item_id")
+  item_name  String          @map("item_name")
+  size       String          @default("") @map("size")
+  qty        Decimal         @default(0) @db.Decimal(12, 2)
+  rate       Decimal         @default(0) @db.Decimal(12, 2)
+  amount     Decimal         @default(0) @db.Decimal(15, 2)
+  total      Decimal         @default(0) @db.Decimal(15, 2)
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+  company    Company         @relation(fields: [company_id], references: [id])
+  item       ItemManagement? @relation(fields: [item_id], references: [id])
+  vardhi     Vardhi          @relation(fields: [vardhi_id], references: [id], onDelete: Cascade)
+
+  @@index([vardhi_id])
+  @@index([item_id])
+}
+
+model VardhiItem {
+  id         String         @id @default(uuid())
+  company_id String         @map("company_id")
+  vardhi_id  String
+  item_id    String
+  size       String
+  qty        Decimal        @default(0) @db.Decimal(12, 2)
+  rate       Decimal        @default(0) @db.Decimal(12, 2)
+  amount     Decimal        @default(0) @db.Decimal(15, 2)
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  company    Company        @relation(fields: [company_id], references: [id])
+  item       ItemManagement @relation(fields: [item_id], references: [id])
+  vardhi     Vardhi         @relation(fields: [vardhi_id], references: [id])
+
+  @@index([vardhi_id])
+  @@index([item_id])
+}
+
+model WorkType {
+  id         String              @id @default(uuid())
+  company_id String              @map("company_id")
+  name       String
+  is_active  Boolean             @default(true)
+  deletedAt  DateTime?           @map("deleted_at")
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  prices     ItemWorkTypePrice[]
+  company    Company             @relation(fields: [company_id], references: [id])
+
+  @@unique([company_id, name])
+  @@index([company_id])
+  @@index([is_active])
+}
+
+model VardhiEstimation {
+  id                            String                      @id @default(uuid())
+  company_id                    String                      @map("company_id")
+  estimation_no                 String
+  contractor                    String
+  work_name                     String
+  file_no                       String?
+  zone_no                       String?
+  month_year                    String?
+  total_amount                  Decimal                     @default(0) @db.Decimal(20, 2)
+  status                        String                      @default("DRAFT")
+  current_stage                 String                      @default("file_submitted") @map("current_stage")
+  created_at                    DateTime                    @default(now())
+  updated_at                    DateTime                    @updatedAt
+  file_submitted_date           DateTime?                   @map("file_submitted_date")
+  store_report_date             DateTime?                   @map("store_report_date")
+  submitted_for_approved_date   DateTime?                   @map("submitted_for_approved_date")
+  approved_date                 DateTime?                   @map("approved_date")
+  approved_no                   String?                     @map("approved_no")
+  bill_prepaid_date             DateTime?                   @map("bill_prepaid_date")
+  bill_audit_date               DateTime?                   @map("bill_audit_date")
+  bill_account_date             DateTime?                   @map("bill_account_date")
+  payment_received_date         DateTime?                   @map("payment_received_date")
+  approved_reason               String?                     @map("approved_reason")
+  bill_account_reason           String?                     @map("bill_account_reason")
+  bill_audit_reason             String?                     @map("bill_audit_reason")
+  bill_prepaid_reason           String?                     @map("bill_prepaid_reason")
+  store_report_reason           String?                     @map("store_report_reason")
+  submitted_for_approved_reason String?                     @map("submitted_for_approved_reason")
+  file_submitted_reason         String?                     @map("file_submitted_reason")
+  company                       Company                     @relation(fields: [company_id], references: [id])
+  items                         VardhiEstimationItem[]
+  invoices                      VardhiInvoice[]
+  vardhiWaterWorksDepartment    VardhiWaterWorksDepartment?
+  vardhis                       Vardhi[]                    @relation("VardhiToVardhiEstimation")
+
+  @@unique([company_id, estimation_no])
+  @@index([company_id])
+  @@index([status])
+  @@index([contractor])
+}
+
+model VardhiEstimationItem {
+  id            String           @id @default(uuid())
+  estimation_id String
+  company_id    String           @map("company_id")
+  item_id       String?
+  custom_name   String?
+  size          String?
+  rate          Decimal          @db.Decimal(12, 2)
+  unit_id       String?
+  ay_id         String?
+  quantity      Decimal          @db.Decimal(12, 2)
+  amount        Decimal          @db.Decimal(12, 2)
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @updatedAt
+  ay            AYMaster?        @relation(fields: [ay_id], references: [id])
+  company       Company          @relation(fields: [company_id], references: [id])
+  estimation    VardhiEstimation @relation(fields: [estimation_id], references: [id], onDelete: Cascade)
+  item          ItemManagement?  @relation(fields: [item_id], references: [id])
+  unit          Unit?            @relation("UnitVardhiEstimation", fields: [unit_id], references: [id])
+
+  @@index([estimation_id])
+}
+
+model VardhiWaterWorksDepartment {
+  id                           String           @id @default(uuid())
+  estimation_id                String           @unique @map("estimation_id")
+  company_id                   String           @map("company_id")
+  work_summary                 String?          @map("work_summary")
+  work_requirement             String?          @map("work_requirement")
+  plot_ownership               String?          @map("plot_ownership")
+  work_type                    String?          @map("work_type")
+  is_duplicate_work            String?          @map("is_duplicate_work")
+  estimated_cost_details       String?          @map("estimated_cost_details")
+  approving_authority          String?          @map("approving_authority")
+  cost_head                    String?          @map("cost_head")
+  work_method                  String?          @map("work_method")
+  work_deadline                String?          @map("work_deadline")
+  is_work_completed_on_time    String?          @map("is_work_completed_on_time")
+  registration_class           String?          @map("registration_class")
+  emd_details                  String?          @map("emd_details")
+  bid_validity                 String?          @map("bid_validity")
+  liability_period             String?          @map("liability_period")
+  gfr_pwd_compliance           String?          @map("gfr_pwd_compliance")
+  is_single_tender             String?          @map("is_single_tender")
+  single_tender_efforts        String?          @map("single_tender_efforts")
+  negotiation_feedback         String?          @map("negotiation_feedback")
+  work_agency                  String?          @map("work_agency")
+  hod_certificate_no_duplicate String?          @map("hod_certificate_no_duplicate")
+  created_at                   DateTime         @default(now())
+  updated_at                   DateTime         @updatedAt
+  company                      Company          @relation(fields: [company_id], references: [id])
+  estimation                   VardhiEstimation @relation(fields: [estimation_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([estimation_id])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  user_id   String    @map("user_id")
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now())
+  usedAt    DateTime? @map("used_at")
+
+  @@index([user_id])
+  @@index([token])
+}
+
+model VardhiAttachment {
+  id         String   @id @default(uuid())
+  vardhi_id  String   @map("vardhi_id")
+  company_id String   @map("company_id")
+  type       String
+  file_path  String   @map("file_path")
+  file_name  String   @map("file_name")
+  file_size  Int?     @map("file_size")
+  mime_type  String?  @map("mime_type")
+  created_at DateTime @default(now())
+  vardhi     Vardhi   @relation(fields: [vardhi_id], references: [id], onDelete: Cascade)
+
+  @@unique([vardhi_id, type, file_name])
+  @@index([vardhi_id])
+  @@index([company_id])
+}
+
+model ItemSearchPreference {
+  id         String         @id @default(uuid())
+  item_id    String         @map("item_id")
+  company_id String         @map("company_id")
+  value      String
+  createdAt  DateTime       @default(now())
+  item       ItemManagement @relation(fields: [item_id], references: [id], onDelete: Cascade)
+
+  @@unique([item_id, value])
+  @@index([item_id])
+  @@index([company_id])
+  @@index([value])
+}
+
+model Location {
+  id                     String                  @id @default(uuid())
+  company_id             String                  @map("company_id")
+  name                   String
+  address                String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  attendances            Attendance[]
+  company                Company                 @relation(fields: [company_id], references: [id])
+  projectLocations       ProjectLocation[]
+  purchaseEntryLocations PurchaseEntryLocation[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+}
+
+model Party {
+  id                   String                @id @default(uuid())
+  company_id           String                @map("company_id")
+  name                 String
+  address              String?
+  mobile_no            String?
+  email                String?
+  gst_no               String?
+  party_type           String                @default("GENERAL")
+  type                 String                @default("GENERAL")
+  bank_account_name    String?               @map("bank_account_name")
+  bank_account_number  String?               @map("bank_account_number")
+  bank_name            String?               @map("bank_name")
+  bank_ifsc_code       String?               @map("bank_ifsc_code")
+  bank_opening_balance Decimal?              @default(0) @map("bank_opening_balance") @db.Decimal(15, 2)
+  current_balance      Decimal?              @default(0) @map("current_balance") @db.Decimal(15, 2)
+  hide_project_items   Boolean               @default(false) @map("hide_project_items")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  attendances          Attendance[]
+  bankTransactions     BankBookTransaction[]
+  cashTransactions     CashBookTransaction[]
+  chequePrints         ChequePrint[]
+  company              Company               @relation(fields: [company_id], references: [id])
+  purchaseEntries      PurchaseEntry[]       @relation("PartyPurchases")
+  supplierItems        PartySupplierItem[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+  @@index([party_type])
+  @@index([type])
+}
+
+model PartySupplierItem {
+  id             String    @id @default(uuid())
+  party_id       String    @map("party_id")
+  capital_sor_id String    @map("capital_sor_id")
+  rate           Decimal   @db.Decimal(12, 2)
+  effective_date DateTime? @map("effective_date")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  party          Party     @relation(fields: [party_id], references: [id], onDelete: Cascade)
+  capitalSor     CapitalSOR @relation(fields: [capital_sor_id], references: [id], onDelete: Cascade)
+  prices         PartySupplierItemPrice[]
+
+  @@unique([party_id, capital_sor_id])
+  @@index([party_id])
+  @@index([capital_sor_id])
+}
+
+model PartySupplierItemPrice {
+  id                    String              @id @default(uuid())
+  company_id            String              @map("company_id")
+  party_supplier_item_id String             @map("party_supplier_item_id")
+  price                 Decimal             @db.Decimal(18, 2)
+  start_date            DateTime            @default(now()) @map("start_date")
+  expiry_date           DateTime?           @map("expiry_date")
+  createdAt             DateTime            @default(now())
+  partySupplierItem     PartySupplierItem   @relation(fields: [party_supplier_item_id], references: [id], onDelete: Cascade)
+  company               Company             @relation(fields: [company_id], references: [id])
+
+  @@index([party_supplier_item_id])
+  @@index([party_supplier_item_id, start_date, expiry_date])
+}
+
+model Project {
+  id                                 String                  @id @default(uuid())
+  company_id                         String                  @map("company_id")
+  name                               String
+  unique_name                        String?                 @unique @map("unique_name")
+  description                        String?
+  location                           String?
+  start_date                         DateTime?
+  end_date                           DateTime?
+  budget                             Decimal                 @default(0) @db.Decimal(15, 2)
+  status                             String                  @default("NOT_STARTED")
+  createdAt                          DateTime                @default(now())
+  updatedAt                          DateTime                @updatedAt
+  year                               String?
+  sr_no                              Int?
+  tender_notice_no                   String?
+  project_no                         String?
+  work_type                          String?
+  no_of_locations                    Int?
+  time_limit                         String?
+  project_estimation_cost            Decimal?                @db.Decimal(15, 2)
+  negotiation_price_id               String?
+  negotiation_price_value            String?
+  negotiation_type                   String?
+  tender_premium_id                  String?
+  tender_premium_value               String?
+  tender_premium_type                String?
+  loa_approved_no                    String?
+  loa_approved_date                  DateTime?
+  correspondence_global_sr_no        Int?                    @map("correspondence_global_sr_no")
+  project_end_date                   DateTime?
+  time_limit_unit                    String?
+  work_order_date                    DateTime?
+  project_approved_amount            Decimal?                @db.Decimal(15, 2)
+  agreement_no                       String?
+  main_item_execution_qty            String?
+  work_progress                      String?
+  sor_id                             String?                 @map("sor_id")
+  department                         String?
+  place_of_work                      String?
+  estimate_amount                    Decimal?                @db.Decimal(15, 2)
+  tender_amount                      Decimal?                @db.Decimal(15, 2)
+  loa_date                           DateTime?
+  time_limit_end                     DateTime?
+  work_completion_date               DateTime?
+  cost_of_completion                 Decimal?                @db.Decimal(15, 2)
+  time_period                        String?
+  remark                             String?
+  wizard_step                        Int                     @default(1)
+  is_completed                       Boolean                 @default(false)
+  deposit_amount                     Decimal?                @db.Decimal(15, 2)
+  sd_amount                          Decimal?                @db.Decimal(15, 2)
+  sd_no                              String?
+  sd_start_date                      DateTime?
+  sd_end_date                        DateTime?
+  retention_money_details            String?
+  retention_money_details_no         String?
+  retention_money_details_start_date DateTime?
+  retention_money_details_end_date   DateTime?
+  area                               String?
+  supervisor                         String?                 @map("supervisor")
+  officer                            String?                 @map("officer")
+  remarks                            String?                 @map("remarks")
+  total_amount                       Decimal?                @db.Decimal(15, 2)
+  sqm                                Decimal?                @db.Decimal(15, 2)
+  brs                                Decimal?                @db.Decimal(15, 2)
+  progress_item_id                   String?
+  created_by                        String?                 @map("created_by")
+  attendances                        Attendance[]
+  bankTransactions                   BankBookTransaction[]
+  belongingsFromTransfers            BelongingsTransfer[]    @relation("FromProject")
+  belongingsToTransfers              BelongingsTransfer[]    @relation("ToProject")
+  cashTransactions                   CashBookTransaction[]
+  company                            Company                 @relation(fields: [company_id], references: [id])
+  negotiationPrice                   NegotiationPrice?       @relation(fields: [negotiation_price_id], references: [id])
+  deposits                           ProjectDeposit[]
+  documents                          ProjectDocument[]
+  photoStages                        ProjectPhotoStage[]
+  photos                             ProjectPhoto[]
+  items                              ProjectItem[]
+  locations                          ProjectLocation[]
+  statusTrackings                    ProjectStatusTracking[]
+  purchaseEntries                    PurchaseEntry[]
+  projectworktypes                   ProjectWorkType[]       @relation("ProjectToProjectWorkType")
+  projectArea                        ProjectArea?            @relation(fields: [area], references: [id])
+  form3aOverride                     Form3AOverride?
+  correspondence                     Correspondence[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+  @@index([status])
+  @@index([work_type])
+  @@index([department])
+  @@index([area])
+}
+
+model Form3AOverride {
+  id                     String   @id @default(uuid())
+  project_id             String   @unique @map("project_id")
+  company_name           String?
+  name_of_work           String?
+  estimate_cost          String?
+  tender_amount          String?
+  start_date             String?
+  completion_date        String?
+  actual_completion_date String?
+  work_done_figure       String?
+  work_done_words        String?
+  details_correct        String?
+  work_status            String?
+  remarks                String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  project                Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@map("form3a_overrides")
+}
+
+model ProjectWorkType {
+  id         String    @id @default(uuid())
+  company_id String    @map("company_id")
+  title      String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  company    Company   @relation(fields: [company_id], references: [id])
+  projects   Project[] @relation("ProjectToProjectWorkType")
+
+  @@unique([company_id, title])
+  @@index([company_id])
+}
+
+model ProjectArea {
+  id         String    @id @default(uuid())
+  company_id String    @map("company_id")
+  title      String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  company    Company   @relation(fields: [company_id], references: [id])
+  projects   Project[]
+
+  @@unique([company_id, title])
+  @@index([company_id])
+}
+
+model ProjectLocation {
+  id          String   @id @default(uuid())
+  company_id  String   @map("company_id")
+  project_id  String
+  location_id String
+  company     Company  @relation(fields: [company_id], references: [id])
+  location    Location @relation(fields: [location_id], references: [id])
+  project     Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@unique([project_id, location_id])
+  @@index([company_id])
+  @@index([project_id])
+  @@index([location_id])
+}
+
+model ProjectDocument {
+  id            String   @id @default(uuid())
+  company_id    String   @map("company_id")
+  project_id    String
+  document_type String
+  file_url      String?
+  file_name     String?
+  file_size     Int?     @default(0)
+  uploaded_at   DateTime @default(now())
+  company       Company  @relation(fields: [company_id], references: [id])
+  project       Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([project_id])
+  @@index([document_type])
+}
+
+model ProjectItem {
+  id                String     @id @default(uuid())
+  company_id        String     @map("company_id")
+  project_id        String
+  capital_sor_id    String
+  size              String     @default("")
+  rate              Decimal    @default(0) @db.Decimal(15, 2)
+  is_price_tracking Boolean    @default(false)
+  add1_actual1      Decimal    @default(0) @db.Decimal(15, 2)
+  add2_actual1      Decimal    @default(0) @db.Decimal(15, 2)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  company           Company    @relation(fields: [company_id], references: [id])
+  project           Project    @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  capitalSOR        CapitalSOR @relation(fields: [capital_sor_id], references: [id])
+
+  @@index([company_id])
+  @@index([project_id])
+  @@index([capital_sor_id])
+  @@map("ProjectItem")
+}
+
+model TempProjectDocument {
+  id            String   @id @default(uuid())
+  company_id    String   @map("company_id")
+  document_type String
+  file_url      String?
+  file_name     String?
+  file_size     Int?     @default(0)
+  created_at    DateTime @default(now())
+  company       Company  @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+  @@index([document_type])
+}
+
+model ProjectPhotoStage {
+  id          String          @id @default(uuid())
+  company_id  String          @map("company_id")
+  project_id  String          @map("project_id")
+  uploaded_by String          @map("uploaded_by")
+  stage_name  String          @map("stage_name")
+  created_at  DateTime        @default(now()) @map("created_at")
+  updated_at  DateTime        @updatedAt @map("updated_at")
+  company     Company         @relation(fields: [company_id], references: [id])
+  project     Project         @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  photos      ProjectPhoto[]
+
+  @@index([company_id])
+  @@index([project_id])
+  @@index([uploaded_by])
+}
+
+model ProjectPhoto {
+  id          String            @id @default(uuid())
+  company_id  String            @map("company_id")
+  project_id  String            @map("project_id")
+  stage_id    String            @map("stage_id")
+  uploaded_by String            @map("uploaded_by")
+  file_url    String?
+  file_name   String?
+  file_size   Int?              @default(0)
+  mime_type   String?           @map("mime_type")
+  created_at  DateTime          @default(now()) @map("created_at")
+  company     Company           @relation(fields: [company_id], references: [id])
+  project     Project           @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  stage       ProjectPhotoStage @relation(fields: [stage_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([project_id])
+  @@index([stage_id])
+  @@index([uploaded_by])
+}
+
+model ProjectDeposit {
+  id             String   @id @default(uuid())
+  company_id     String   @map("company_id")
+  project_id     String
+  deposit_amount Decimal  @db.Decimal(15, 2)
+  deposit_date   DateTime
+  notes          String?
+  createdAt      DateTime @default(now())
+  company        Company  @relation(fields: [company_id], references: [id])
+  project        Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([project_id])
+  @@index([deposit_date])
+}
+
+model ProjectStatusTracking {
+  id         String   @id @default(uuid())
+  company_id String   @map("company_id")
+  project_id String
+  status     String
+  remarks    String?
+  createdAt  DateTime @default(now())
+  company    Company  @relation(fields: [company_id], references: [id])
+  project    Project  @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([project_id])
+  @@index([status])
+}
+
+model PurchaseEntry {
+  id                 String                  @id @default(uuid())
+  company_id         String                  @map("company_id")
+  sr_no              Int                     @default(autoincrement())
+  entry_no           String?                 @unique @map("entry_no")
+  entry_date         DateTime
+  voucher_type       String                  @default("PURCHASE")
+  account_type       String                  @default("DEBIT")
+  transaction_type   String                  @default("LOCAL")
+  project_id         String?
+  party_id           String
+  instrument_no      String?
+  gst_percent        Decimal                 @default(0) @db.Decimal(5, 2)
+  gst_total          Decimal                 @default(0) @db.Decimal(15, 2)
+  received_by        String?
+  custom_name        String?
+  remark             String?
+  action_entry       String?
+  payment_status     String                  @default("UNPAID")
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  company            Company                 @relation(fields: [company_id], references: [id])
+  party              Party                   @relation("PartyPurchases", fields: [party_id], references: [id])
+  project            Project?                @relation(fields: [project_id], references: [id])
+  receivedByEmployee Employee?               @relation("PurchaseEntry_received_byToEmployee", fields: [received_by], references: [id])
+  locations          PurchaseEntryLocation[]
+  materials          PurchaseEntryMaterial[]
+
+  @@unique([company_id, sr_no])
+  @@index([company_id])
+  @@index([project_id])
+  @@index([party_id])
+  @@index([entry_date])
+  @@index([voucher_type])
+  @@index([entry_no])
+  @@index([payment_status])
+}
+
+model PurchaseEntryLocation {
+  id                String        @id @default(uuid())
+  company_id        String        @map("company_id")
+  purchase_entry_id String
+  location_id       String
+  company           Company       @relation(fields: [company_id], references: [id])
+  location          Location      @relation(fields: [location_id], references: [id])
+  purchaseEntry     PurchaseEntry @relation(fields: [purchase_entry_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([purchase_entry_id])
+  @@index([location_id])
+}
+
+model PurchaseEntryMaterial {
+  id                String        @id @default(uuid())
+  company_id        String        @map("company_id")
+  purchase_entry_id String
+  material_id       String
+  qty               Decimal       @db.Decimal(15, 2)
+  rate              Decimal       @db.Decimal(15, 2)
+  total             Decimal       @db.Decimal(15, 2)
+  gst_percent       Decimal       @default(0) @db.Decimal(5, 2)
+  subcontractor_ids String?
+  createdAt         DateTime      @default(now())
+  company           Company       @relation(fields: [company_id], references: [id])
+  capitalSOR        Material      @relation(fields: [material_id], references: [id])
+  purchaseEntry     PurchaseEntry @relation(fields: [purchase_entry_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([purchase_entry_id])
+  @@index([material_id])
+}
+
+model Account {
+  id               String                @id @default(uuid())
+  company_id       String                @map("company_id")
+  type             String                @default("BANK")
+  account_name     String?
+  cash_name        String?               @map("cash_name")
+  account_number   String?
+  bank_name        String?
+  ifsc_code        String?
+  opening_balance  Decimal               @default(0) @db.Decimal(15, 2)
+  current_balance  Decimal               @default(0) @db.Decimal(15, 2)
+  is_active        Boolean               @default(true)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  company          Company               @relation(fields: [company_id], references: [id])
+  bankTransactions BankBookTransaction[] @relation("AccountBankTransactions")
+  cashTransactions CashBookTransaction[] @relation("AccountCashTransactions")
+  chequePrints     ChequePrint[]
+
+  @@unique([company_id, type, account_number])
+  @@unique([company_id, type, cash_name])
+  @@index([company_id])
+  @@index([type])
+  @@index([is_active])
+}
+
+model BankBookTransaction {
+  id                String    @id @default(uuid())
+  company_id        String    @map("company_id")
+  sr_no             Int       @default(autoincrement())
+  account_id        String
+  transaction_date  DateTime
+  transaction_type  String    @default("DEBIT")
+  ledger            String
+  ledger_type       String?   @map("ledger_type")
+  project_id        String?   @map("project_id")
+  party_id          String?   @map("party_id")
+  reference_type    String?   @map("reference_type")
+  reference_id      String?   @map("reference_id")
+  against_reference String?   @map("against_reference")
+  amount            Decimal   @default(0) @db.Decimal(15, 2)
+  credit_amount     Decimal   @default(0) @db.Decimal(15, 2)
+  debit_amount      Decimal   @default(0) @db.Decimal(15, 2)
+  balance           Decimal   @default(0) @db.Decimal(15, 2)
+  narration         String?   @map("narration")
+  tender_id         String?   @map("tender_id")
+  is_deleted        Boolean   @default(false) @map("is_deleted")
+  deleted_at        DateTime? @map("deleted_at")
+  created_by        String?   @map("created_by")
+  updated_by        String?   @map("updated_by")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime? @default(now()) @updatedAt
+  account           Account   @relation("AccountBankTransactions", fields: [account_id], references: [id], onDelete: Cascade)
+  company           Company   @relation(fields: [company_id], references: [id])
+  party             Party?    @relation(fields: [party_id], references: [id])
+  project           Project?  @relation(fields: [project_id], references: [id])
+
+  @@index([company_id])
+  @@index([account_id])
+  @@index([transaction_date])
+  @@index([project_id])
+  @@index([party_id])
+  @@index([ledger_type])
+  @@index([reference_type])
+  @@index([is_deleted])
+}
+
+model CashBookTransaction {
+  id               String    @id @default(uuid())
+  company_id       String    @map("company_id")
+  sr_no            Int       @default(autoincrement())
+  cash_book_id     String?   @map("cash_book_id")
+  account_id       String?   @map("account_id")
+  transaction_date DateTime
+  transaction_type String    @default("DEBIT")
+  ledger           String    @map("ledger")
+  ledger_type      String?   @map("ledger_type")
+  project_id       String?   @map("project_id")
+  party_id         String?   @map("party_id")
+  particular       String?   @map("particular")
+  amount           Decimal   @default(0) @db.Decimal(15, 2)
+  credit_amount    Decimal   @default(0) @db.Decimal(15, 2)
+  debit_amount     Decimal   @default(0) @db.Decimal(15, 2)
+  balance          Decimal   @default(0) @db.Decimal(15, 2)
+  is_deleted       Boolean   @default(false) @map("is_deleted")
+  deleted_at       DateTime? @map("deleted_at")
+  created_by       String?   @map("created_by")
+  updated_by       String?   @map("updated_by")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime? @default(now()) @updatedAt
+  account          Account?  @relation("AccountCashTransactions", fields: [account_id], references: [id], onDelete: Cascade)
+  company          Company   @relation(fields: [company_id], references: [id])
+  party            Party?    @relation(fields: [party_id], references: [id])
+  project          Project?  @relation(fields: [project_id], references: [id])
+
+  @@index([company_id])
+  @@index([cash_book_id])
+  @@index([account_id])
+  @@index([transaction_date])
+  @@index([project_id])
+  @@index([party_id])
+  @@index([ledger_type])
+  @@index([is_deleted])
+}
+
+model Ledger {
+  id                       String   @id @default(uuid())
+  company_id               String   @map("company_id")
+  name                     String
+  code                     String
+  include_expenses_activity Boolean @default(false) @map("include_expenses_activity")
+  show_in_cash_book        Boolean  @default(false) @map("show_in_cash_book")
+  show_in_bank_book        Boolean  @default(false) @map("show_in_bank_book")
+  created_at               DateTime @default(now()) @map("created_at")
+  updated_at               DateTime @updatedAt @map("updated_at")
+  company                  Company  @relation(fields: [company_id], references: [id])
+
+  @@unique([company_id, code])
+  @@index([company_id])
+}
+
+model Task {
+  id           String    @id @default(uuid())
+  company_id   String    @map("company_id")
+  task_type    String    @default("GENERAL")
+  title        String
+  reference_id String?
+  amount       Decimal   @default(0) @db.Decimal(15, 2)
+  status       String    @default("PENDING")
+  due_date     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  company      Company   @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+  @@index([task_type])
+  @@index([status])
+  @@index([due_date])
+}
+
+model ChequePrint {
+  id              String   @id @default(uuid())
+  company_id      String   @map("company_id")
+  bank_account_id String   @map("bank_account_id")
+  party_id        String?
+  cheque_no       String
+  amount          Decimal  @db.Decimal(15, 2)
+  cheque_date     DateTime
+  payee_name      String?
+  is_printed      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  bankAccount     Account  @relation(fields: [bank_account_id], references: [id])
+  company         Company  @relation(fields: [company_id], references: [id])
+  party           Party?   @relation(fields: [party_id], references: [id])
+
+  @@unique([bank_account_id, cheque_no])
+  @@index([company_id])
+  @@index([bank_account_id])
+  @@index([party_id])
+  @@index([cheque_date])
+}
+
+model BelongingsTransfer {
+  id              String   @id @default(uuid())
+  company_id      String   @map("company_id")
+  from_project_id String
+  to_project_id   String
+  description     String?
+  transfer_date   DateTime
+  createdAt       DateTime @default(now())
+  company         Company  @relation(fields: [company_id], references: [id])
+  fromProject     Project  @relation("FromProject", fields: [from_project_id], references: [id])
+  toProject       Project  @relation("ToProject", fields: [to_project_id], references: [id])
+
+  @@index([company_id])
+  @@index([from_project_id])
+  @@index([to_project_id])
+  @@index([transfer_date])
+}
+
+model ModulePermission {
+  id         String       @id @default(uuid())
+  company_id String       @map("company_id")
+  user_id    String
+  module     String
+  permission Permission[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  company    Company      @relation(fields: [company_id], references: [id])
+  user       User         @relation(fields: [user_id], references: [id])
+
+  @@unique([company_id, user_id, module])
+  @@index([company_id])
+  @@index([user_id])
+  @@index([module])
+}
+
+model Attendance {
+  id              String    @id @default(uuid())
+  company_id      String    @map("company_id")
+  sr_no           Int       @default(autoincrement())
+  attendance_date DateTime  @map("attendance_date")
+  worker_name     String    @map("worker_name")
+  party_id        String?   @map("party_id")
+  project_id      String?   @map("project_id")
+  location_id     String?   @map("location_id")
+  status          String    @default("PRESENT")
+  in_time         String?   @map("in_time")
+  out_time        String?   @map("out_time")
+  overtime_hours  Decimal?  @map("overtime_hours") @db.Decimal(5, 2)
+  wages           Decimal?  @map("wages") @db.Decimal(15, 2)
+  remarks         String?   @map("remarks")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  company         Company   @relation(fields: [company_id], references: [id])
+  location        Location? @relation(fields: [location_id], references: [id])
+  party           Party?    @relation(fields: [party_id], references: [id])
+  project         Project?  @relation(fields: [project_id], references: [id])
+
+  @@unique([company_id, sr_no, attendance_date])
+  @@index([company_id])
+  @@index([attendance_date])
+  @@index([project_id])
+  @@index([worker_name])
+  @@index([party_id])
+}
+
+model CashBook {
+  id              String   @id @default(uuid())
+  company_id      String   @map("company_id")
+  name            String   @map("name")
+  code            String   @map("code")
+  opening_balance Decimal  @default(0) @map("opening_balance") @db.Decimal(15, 2)
+  is_active       Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  company         Company  @relation(fields: [company_id], references: [id])
+
+  @@unique([company_id, code])
+  @@index([company_id])
+}
+
+model CapitalSOR {
+  id                   String            @id @default(uuid())
+  company_id           String            @map("company_id")
+  item_name            String            @map("item_name")
+  searching_preference String?           @map("searching_preference")
+  uom                  String            @default("") @map("uom")
+  gst_master           String?           @map("gst_master")
+  is_subcontractor     Boolean           @default(false) @map("is_subcontractor")
+  subcontractor_id     String?           @map("subcontractor_id")
+  is_active            Boolean           @default(true) @map("is_active")
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  departmentId         String?           @map("departmentId")
+  itemNo               String?           @map("itemNo")
+  itemMasterId         String?           @map("item_master_id")
+  other_item_ids       String?           @map("other_item_ids")
+  rate                 Decimal?          @db.Decimal(12, 2)
+  shortName            String?           @map("shortName")
+  sorId                String?           @map("sorId")
+  srNo                 String?           @map("srNo")
+  work_type            String?           @map("work_type")
+  company              Company           @relation(fields: [company_id], references: [id])
+  itemMaster           ItemMaster?       @relation("CapitalSORToItemMaster", fields: [itemMasterId], references: [id])
+  subcontractor        Subcontractor?    @relation(fields: [subcontractor_id], references: [id])
+  projectItems         ProjectItem[]
+  prices               CapitalSORPrice[]
+  partySupplierItems   PartySupplierItem[]
+
+  @@unique([company_id, item_name])
+  @@index([company_id])
+  @@index([item_name])
+  @@index([itemMasterId])
+}
+
+model SORItem {
+  id          String       @id @default(uuid())
+  company_id  String       @map("company_id")
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  itemMasters ItemMaster[]
+  company     Company      @relation(fields: [company_id], references: [id])
+
+  @@unique([company_id, name])
+  @@index([company_id])
+}
+
+model ItemMaster {
+  id           String       @id @default(uuid())
+  company_id   String       @map("company_id")
+  departmentId String?      @map("department_id")
+  sorId        String       @map("sor_id")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  capitalSors  CapitalSOR[] @relation("CapitalSORToItemMaster")
+  company      Company      @relation(fields: [company_id], references: [id])
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  sor          SORItem      @relation(fields: [sorId], references: [id])
+
+  @@index([company_id])
+}
+
+model CapitalSORPrice {
+  id            String     @id @default(uuid())
+  company_id    String     @map("company_id")
+  capitalSor_id String     @map("capital_sor_id")
+  price         Decimal    @db.Decimal(18, 2)
+  start_date    DateTime   @default(now()) @map("start_date")
+  expiry_date   DateTime?  @map("expiry_date")
+  createdAt     DateTime   @default(now())
+  capitalSor    CapitalSOR @relation(fields: [capitalSor_id], references: [id], onDelete: Cascade)
+  company       Company    @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+  @@index([capitalSor_id])
+  @@index([capitalSor_id, start_date, expiry_date])
+}
+
+model Activity {
+  id         String     @id @default(cuid())
+  companyId  String     @map("company_id")
+  userId     String     @map("user_id")
+  entityType String     @map("entity_type")
+  entityId   String     @map("entity_id")
+  action     ActionType
+  title      String
+  message    String
+  metadata   Json?
+  isRead     Boolean    @default(false) @map("is_read")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  company    Company    @relation("CompanyActivities", fields: [companyId], references: [id], onDelete: Cascade)
+  user       User       @relation("UserActivities", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([isRead])
+  @@map("activities")
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String?          @map("user_id")
+  targetRole Role             @default(SuperAdmin) @map("target_role")
+  type       NotificationType @default(INFO)
+  entity     String
+  action     String
+  entityId   String?          @map("entity_id")
+  message    String
+  link       String?
+  isRead     Boolean          @default(false) @map("is_read")
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+  user       User?            @relation("UserNotifications", fields: [userId], references: [id])
+
+  @@index([targetRole])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model Material {
+  id                     String                  @id
+  company_id             String
+  name                   String
+  rate                   Decimal                 @default(0) @db.Decimal(15, 2)
+  hsn_sac                String?
+  unit_id                String?
+  gst_percent            Decimal                 @default(18) @db.Decimal(5, 2)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime
+  Company                Company                 @relation(fields: [company_id], references: [id])
+  MaterialPriceHistory   MaterialPriceHistory[]
+  purchaseEntryMaterials PurchaseEntryMaterial[]
+
+  @@unique([company_id, name])
+  @@index([company_id])
+}
+
+model MaterialPrefix {
+  id         String   @id
+  company_id String
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  Company    Company  @relation(fields: [company_id], references: [id])
+
+  @@unique([company_id, name])
+  @@index([company_id])
+}
+
+model MaterialPriceHistory {
+  id          String    @id
+  company_id  String
+  material_id String
+  rate        Decimal   @db.Decimal(15, 2)
+  start_date  DateTime  @default(now())
+  expire_date DateTime?
+  createdAt   DateTime  @default(now())
+  Company     Company   @relation(fields: [company_id], references: [id])
+  Material    Material  @relation(fields: [material_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([material_id])
+  @@index([start_date])
+}
+
+model vardhi_counter {
+  id    String @id
+  value Int    @default(0)
+}
+
+model SORGroup {
+  id         String   @id @default(uuid())
+  company_id String   @map("company_id")
+  name       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  company    Company  @relation(fields: [company_id], references: [id])
+
+  @@index([company_id])
+  @@map("SORGroup")
+}
+
+model Correspondence {
+  id               String   @id @default(uuid())
+  company_id       String   @map("company_id")
+  project_id       String
+  sr_no            Int
+  type             String?
+  docket_no        String?
+  subject          String?
+  document_content String?
+  document_urls    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company Company @relation(fields: [company_id], references: [id])
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@index([company_id])
+  @@index([project_id])
+  @@map("correspondence")
+}
+
+model CompanyAccessSetting {
+  id                 String   @id @default(uuid())
+  allow_add_company  Boolean  @default(true) @map("allow_add_company")
+  allow_edit_company Boolean  @default(true) @map("allow_edit_company")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("company_access_settings")
+}
+
+enum Plan {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum CompanyStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum Role {
+  SuperAdmin
+  Admin
+  Accountant
+  DataEntry
+  Supervisor
+  Zone
+  HR
+  Manager
+  Recruiter
+}
+
+enum OfficerStatus {
+  CURRENT
+  PAST
+}
+
+enum Permission {
+  VIEW
+  CREATE
+  EDIT
+  DELETE
+}
+
+enum ActionType {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+}
+
+model ZoneApproval {
+  id             String   @id @default(uuid())
+  company_id     String
+  zone_id        String
+  approved_vardhi_ids String @map("approved_vardhi_ids") @db.Text
+  created_at     DateTime @default(now()) @map("created_at")
+  updated_at     DateTime @updatedAt @map("updated_at")
+
+  zone           ZoneMaster @relation(fields: [zone_id], references: [id], onDelete: Cascade)
+
+  @@unique([company_id, zone_id])
+  @@index([company_id, zone_id])
+}
