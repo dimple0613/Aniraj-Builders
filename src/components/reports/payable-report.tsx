@@ -239,13 +239,7 @@ export function PayableReport() {
                             <Download className="h-4 w-4" />
                             Export
                         </Button>
-                        <Button className='inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs' variant="outline" onClick={handlePrint} disabled={loading || data.length === 0}>
-                            <Printer className="h-4 w-4" />
-                            Print
-                        </Button>
-                        <Button className='!h-8 rounded-md px-3 text-xs' onClick={() => fetchReport(1)} disabled={loading}>
-                            {loading ? 'Loading...' : 'Generate Report'}
-                        </Button>
+
                     </div>
                 </div>
             </div>
