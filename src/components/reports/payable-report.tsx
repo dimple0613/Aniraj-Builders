@@ -7,7 +7,7 @@ import { Column, DataTable, DataTableFilter } from '../common';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Printer, Download, Wallet } from 'lucide-react';
+import { Download, Wallet } from 'lucide-react';
 import { ACCOUNT_TYPES } from '@/lib/constants';
 import { StartBankingProcess } from './start-banking-process';
 
@@ -145,10 +145,6 @@ export function PayableReport() {
 
     const handleLimitChange = (newLimit: number) => {
         setLimit(newLimit);
-    };
-
-    const handlePrint = () => {
-        window.print();
     };
 
     const handleExport = () => {
