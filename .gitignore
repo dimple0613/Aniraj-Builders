@@ -47,3 +47,12 @@ strip_ddl2.js
 done
 working
 make
+
+# uploaded files (user data)
+/public/uploads/
+
+# docker compose backups
+_docker-compose.yml
+
+# lock file (optional - keep if you want reproducible installs)
+# package-lock.json
