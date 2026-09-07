@@ -14,7 +14,6 @@ import {
     Loader2,
     Save,
     ArrowLeft,
-    Printer,
     Check,
     Building2,
     User,
@@ -199,34 +198,80 @@ export default function VardhiInvoiceForm({ estimation, existingInvoice }: Props
         }
     }, [estimation, existingInvoice, formik.values.invoice_no]);
 
+    // Supplier percentage based on Item Type = "Supplier" estimate items
+    const { supplierPercentage, taxDisabled } = useMemo(() => {
+        const estimateItems = estimation?.items || [];
+        const totalEstimateAmount = estimateItems.reduce(
+            (sum: number, it: any) => sum + (Number(it.amount) || 0),
+            0
+        );
+        const supplierAmount = estimateItems.reduce(
+            (sum: number, it: any) =>
+                it?.item?.item_type === 'Supplier'
+                    ? sum + (Number(it.amount) || 0)
+                    : sum,
+            0
+        );
+        const percentage =
+            totalEstimateAmount > 0
+                ? (supplierAmount / totalEstimateAmount) * 100
+                : 0;
+        return {
+            supplierPercentage: percentage,
+            taxDisabled: percentage <= 35,
+        };
+    }, [estimation]);
+
+    // Auto uncheck all tax checkboxes when supplier percentage <= 35%
+    useEffect(() => {
+        if (taxDisabled) {
+            formik.setFieldValue('is_cgst_enabled', false);
+            formik.setFieldValue('is_sgst_enabled', false);
+            formik.setFieldValue('is_it_enabled', false);
+            formik.setFieldValue('is_labour_cess_enabled', false);
+            formik.setFieldValue('is_cgst_tds_enabled', false);
+            formik.setFieldValue('is_sgst_tds_enabled', false);
+            formik.setFieldValue('is_add_deposit_enabled', false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [taxDisabled]);
+
     // Live Calculations
     const calculations = useMemo(() => {
         const amount = parseFloat(formik.values.amount) || 0;
         const qty = parseFloat(formik.values.quantity) || 1;
         const subtotal = amount * qty;
 
-        const cgstRate = formik.values.is_cgst_enabled ? parseFloat(formik.values.cgst_percent) || 0 : 0;
-        const sgstRate = formik.values.is_sgst_enabled ? parseFloat(formik.values.sgst_percent) || 0 : 0;
+        const cgstEnabled = taxDisabled ? false : formik.values.is_cgst_enabled;
+        const sgstEnabled = taxDisabled ? false : formik.values.is_sgst_enabled;
+        const itEnabled = taxDisabled ? false : formik.values.is_it_enabled;
+        const labourCessEnabled = taxDisabled ? false : formik.values.is_labour_cess_enabled;
+        const cgstTdsEnabled = taxDisabled ? false : formik.values.is_cgst_tds_enabled;
+        const sgstTdsEnabled = taxDisabled ? false : formik.values.is_sgst_tds_enabled;
+        const addDepositEnabled = taxDisabled ? false : formik.values.is_add_deposit_enabled;
+
+        const cgstRate = cgstEnabled ? parseFloat(formik.values.cgst_percent) || 0 : 0;
+        const sgstRate = sgstEnabled ? parseFloat(formik.values.sgst_percent) || 0 : 0;
         const totalGstRate = cgstRate + sgstRate;
 
         const taxtotal = totalGstRate > 0
             ? subtotal - (100 / (100 + totalGstRate)) * subtotal
             : 0;
 
-        const cgst = formik.values.is_cgst_enabled
-            ? (formik.values.is_sgst_enabled ? taxtotal / 2 : taxtotal)
+        const cgst = cgstEnabled
+            ? (sgstEnabled ? taxtotal / 2 : taxtotal)
             : 0;
-        const sgst = formik.values.is_sgst_enabled
+        const sgst = sgstEnabled
             ? taxtotal - cgst
             : 0;
 
         const grossTotal = Number((subtotal - Number(cgst.toFixed(2)) - Number(sgst.toFixed(2))).toFixed(2));
 
-        const it = formik.values.is_it_enabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.it_percent) || 0) : 0;
-        const labourCess = formik.values.is_labour_cess_enabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.labour_cess_percent) || 0) : 0;
-        const cgstTds = formik.values.is_cgst_tds_enabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.cgst_tds_percent) || 0) : 0;
-        const sgstTds = formik.values.is_sgst_tds_enabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.sgst_tds_percent) || 0) : 0;
-        const addDeposit = formik.values.is_add_deposit_enabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.add_deposit_percent) || 0) : 0;
+        const it = itEnabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.it_percent) || 0) : 0;
+        const labourCess = labourCessEnabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.labour_cess_percent) || 0) : 0;
+        const cgstTds = cgstTdsEnabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.cgst_tds_percent) || 0) : 0;
+        const sgstTds = sgstTdsEnabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.sgst_tds_percent) || 0) : 0;
+        const addDeposit = addDepositEnabled ? calculateTaxAmount(grossTotal, parseFloat(formik.values.add_deposit_percent) || 0) : 0;
 
         const totalDeductions = Number((it + labourCess + cgstTds + sgstTds + addDeposit).toFixed(2));
         const netPayable = Number((subtotal - totalDeductions).toFixed(2));
@@ -245,7 +290,7 @@ export default function VardhiInvoiceForm({ estimation, existingInvoice }: Props
             totalDeductions,
             netPayable
         };
-    }, [formik.values]);
+    }, [formik.values, taxDisabled]);
 
     const handleCheckboxChange = (name: string, checked: boolean) => {
         formik.setFieldValue(name, checked);
@@ -290,18 +335,6 @@ export default function VardhiInvoiceForm({ estimation, existingInvoice }: Props
                         </h2>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                        {viewMode === "preview" && (
-                            <Button
-                                type="button"
-                                onClick={() => window.print()}
-                                size="sm"
-                                variant="outline"
-                                className="gap-1.5"
-                            >
-                                <Printer className="h-4 w-4" />
-                                Print
-                            </Button>
-                        )}
                         <div className="flex bg-slate-100 rounded-lg p-1">
                             <Button
                                 type="button"
@@ -338,6 +371,7 @@ export default function VardhiInvoiceForm({ estimation, existingInvoice }: Props
                     calculations={calculations}
                     handleCheckboxChange={handleCheckboxChange}
                     estimation={estimation}
+                    taxDisabled={taxDisabled}
                 />
             ) : (
                 <PreviewModeView
@@ -352,7 +386,7 @@ export default function VardhiInvoiceForm({ estimation, existingInvoice }: Props
     );
 }
 
-function EditModeView({ formik, calculations, handleCheckboxChange, estimation }: any) {
+function EditModeView({ formik, calculations, handleCheckboxChange, estimation, taxDisabled }: any) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Side: Basic Info & Seller/Buyer */}
@@ -568,6 +602,7 @@ function EditModeView({ formik, calculations, handleCheckboxChange, estimation }
                                 enabled={formik.values.is_cgst_enabled}
                                 onChange={formik.handleChange}
                                 onToggle={handleCheckboxChange}
+                                disabled={taxDisabled}
                             />
                             <TaxRow
                                 label="SGST"
@@ -577,6 +612,7 @@ function EditModeView({ formik, calculations, handleCheckboxChange, estimation }
                                 enabled={formik.values.is_sgst_enabled}
                                 onChange={formik.handleChange}
                                 onToggle={handleCheckboxChange}
+                                disabled={taxDisabled}
                             />
                         </div>
 
@@ -597,6 +633,7 @@ function EditModeView({ formik, calculations, handleCheckboxChange, estimation }
                                 enabled={formik.values.is_it_enabled}
                                 onChange={formik.handleChange}
                                 onToggle={handleCheckboxChange}
+                                disabled={taxDisabled}
                                 isDeduction
                             />
                             <TaxRow
@@ -607,6 +644,7 @@ function EditModeView({ formik, calculations, handleCheckboxChange, estimation }
                                 enabled={formik.values.is_labour_cess_enabled}
                                 onChange={formik.handleChange}
                                 onToggle={handleCheckboxChange}
+                                disabled={taxDisabled}
                                 isDeduction
                             />
                             <TaxRow
@@ -617,6 +655,7 @@ function EditModeView({ formik, calculations, handleCheckboxChange, estimation }
                                 enabled={formik.values.is_cgst_tds_enabled}
                                 onChange={formik.handleChange}
                                 onToggle={handleCheckboxChange}
+                                disabled={taxDisabled}
                                 isDeduction
                             />
                             <TaxRow
@@ -627,6 +666,7 @@ function EditModeView({ formik, calculations, handleCheckboxChange, estimation }
                                 enabled={formik.values.is_sgst_tds_enabled}
                                 onChange={formik.handleChange}
                                 onToggle={handleCheckboxChange}
+                                disabled={taxDisabled}
                                 isDeduction
                             />
                             <TaxRow
@@ -637,6 +677,7 @@ function EditModeView({ formik, calculations, handleCheckboxChange, estimation }
                                 enabled={formik.values.is_add_deposit_enabled}
                                 onChange={formik.handleChange}
                                 onToggle={handleCheckboxChange}
+                                disabled={taxDisabled}
                                 isDeduction
                             />
                         </div>
@@ -721,12 +762,28 @@ function PreviewModeView({ formik, calculations, formatDate, numberToWords, esti
     const totalDeductions = calculations.totalDeductions;
     const netPayable = calculations.netPayable;
     const roundedNetAmount = Math.round(netPayable);
+    const hasGst = formik.values.is_cgst_enabled || formik.values.is_sgst_enabled;
+    const hasDeductions =
+        formik.values.is_it_enabled ||
+        formik.values.is_labour_cess_enabled ||
+        formik.values.is_cgst_tds_enabled ||
+        formik.values.is_sgst_tds_enabled ||
+        formik.values.is_add_deposit_enabled;
     const incomeTax = formik.values.is_it_enabled
         ? (subtotal * Number(formik.values.it_percent || 0)) / 100
         : 0;
     return (
         <div className="invoice-wrapper">
             <table cellSpacing={0}>
+                <colgroup>
+                    <col style={{ width: "10.6%" }} />
+                    <col style={{ width: "22.3%" }} />
+                    <col style={{ width: "8.7%" }} />
+                    <col style={{ width: "13.6%" }} />
+                    <col style={{ width: "11.5%" }} />
+                    <col style={{ width: "10.8%" }} />
+                    <col style={{ width: "22.3%" }} />
+                </colgroup>
                 <tbody>
                     <tr className="text-[13px]  tracking-wider text-slate-700 text-left">
                         <td
@@ -1065,34 +1122,36 @@ function PreviewModeView({ formik, calculations, formatDate, numberToWords, esti
                             <b>₹{formatIndianCurrency(calculations.subtotal)}</b>
                         </td>
                     </tr>
-                    <tr className=" border transition-colors">
-                        <td className="p-3 py-2 border text-left text-[13px] text-muted-foreground">
-                            <p style={{ textIndent: "0pt", textAlign: "left" }}>
-                                <br />
-                            </p>
-                        </td>
-                        <td
-                            colSpan={3}
-                            className="p-3 text-red-600 py-2 border text-right text-[13px]"
-                        >
-                            <b className="s4">Deduction</b>
-                        </td>
-                        <td className="p-3 py-2 border  text-left text-[13px] text-muted-foreground">
-                            <p style={{ textIndent: "0pt", textAlign: "left" }}>
-                                <br />
-                            </p>
-                        </td>
-                        <td className="p-3 py-2 border  text-left border-r-0 text-[13px] text-muted-foreground">
-                            <p style={{ textIndent: "0pt", textAlign: "left" }}>
-                                <br />
-                            </p>
-                        </td>
-                        <td className="p-3 py-2 text-blue-600 border  text-right text-[13px] ">
-                           <p style={{ textIndent: "0pt", textAlign: "left" }}>
-                                <br />
-                            </p>
-                        </td>
-                    </tr>
+                    {hasDeductions && (
+                        <tr className=" border transition-colors">
+                            <td className="p-3 py-2 border text-left text-[13px] text-muted-foreground">
+                                <p style={{ textIndent: "0pt", textAlign: "left" }}>
+                                    <br />
+                                </p>
+                            </td>
+                            <td
+                                colSpan={3}
+                                className="p-3 text-red-600 py-2 border text-right text-[13px]"
+                            >
+                                <b className="s4">Deduction</b>
+                            </td>
+                            <td className="p-3 py-2 border  text-left text-[13px] text-muted-foreground">
+                                <p style={{ textIndent: "0pt", textAlign: "left" }}>
+                                    <br />
+                                </p>
+                            </td>
+                            <td className="p-3 py-2 border  text-left border-r-0 text-[13px] text-muted-foreground">
+                                <p style={{ textIndent: "0pt", textAlign: "left" }}>
+                                    <br />
+                                </p>
+                            </td>
+                            <td className="p-3 py-2 text-blue-600 border  text-right text-[13px] ">
+                               <p style={{ textIndent: "0pt", textAlign: "left" }}>
+                                    <br />
+                                </p>
+                            </td>
+                        </tr>
+                    )}
                     {
                         formik.values.is_it_enabled && (
                             <tr className="hover:bg-blue-50 transition-colors">
@@ -1234,127 +1293,131 @@ function PreviewModeView({ formik, calculations, formatDate, numberToWords, esti
                             </b>
                         </td>
                     </tr>
-                    <tr className="bg-slate-100 text-[13px]  tracking-wider text-slate-700 text-left">
-                        <td
-                            className="p-3 py-2 border font-bold border-slate-300 w-[8%]"
-                            rowSpan={2}
-                            style={{ textAlign: "center" }}
-                        >
-                            <p className="s4">HSN/SAC</p>
-                        </td>
-                        <td
-                            rowSpan={2}
-                            className="p-3 py-2 border font-bold border-slate-300 w-[18%]"
-                            style={{ textAlign: "center" }}
-                        >
-                            Taxable <br />
-                            Value
-                        </td>
-                        <td
-                            colSpan={2}
-                            className="p-3 py-2 border font-bold border-slate-300 w-[18%]"
-                            style={{ textAlign: "center" }}
-                        >
-                            <p className="s4">CGST</p>
-                        </td>
-                        <td
-                            colSpan={2}
-                            className="p-3 py-2 border font-bold border-slate-300 w-[18%]"
-                            style={{ textAlign: "center" }}
-                        >
-                            <p className="s4">SGST/UTGST</p>
-                        </td>
-                        <td
-                            rowSpan={2}
-                            className="p-3 py-2 border font-bold border-slate-300 w-[18%]"
-                            style={{ textAlign: "center" }}
-                        >
-                            Total <br /> Tax Amount
-                            <span />
-                        </td>
-                    </tr>
-                    <tr className="bg-slate-100 text-[13px]  tracking-wider text-slate-700 text-left">
-                        <td className="p-3 py-2 border font-bold border-slate-300">
-                            <p className="s3">Rate</p>
-                        </td>
-                        <td className="p-3 py-2 border font-bold border-slate-300">
-                            <p className="s3">Amount</p>
-                        </td>
-                        <td className="p-3 py-2 border font-bold border-slate-300">
-                            Rate
-                        </td>
-                        <td className="p-3 py-2 border font-bold border-slate-300">
-                            Amount
-                        </td>
-                    </tr>
-                    <tr className="hover:bg-blue-50 transition-colors">
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            {formik.values.hsn_sac}
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            {formatIndianCurrency(grossTotal)}
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            {formik.values.cgst_percent}%
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            {formatIndianCurrency(cgst)}
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            {formik.values.sgst_percent}%
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            {formatIndianCurrency(sgst)}
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            {formatIndianCurrency(taxtotal)}
-                        </td>
-                    </tr>
-                    <tr className="hover:bg-blue-50 transition-colors">
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            <b>
-                                Total
-                            </b>
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            <b>{formatIndianCurrency(grossTotal)}</b>
-                        </td>
-                        <td style={{ width: "34pt", borderStyle: "solid", borderWidth: "1pt" }}>
+                    {hasGst && (
+                        <>
+                            <tr className="bg-slate-100 text-[13px]  tracking-wider text-slate-700 text-left">
+                                <td
+                                    className="p-3 py-2 border font-bold border-slate-300"
+                                    rowSpan={2}
+                                    style={{ textAlign: "center" }}
+                                >
+                                    <p className="s4">HSN/SAC</p>
+                                </td>
+                                <td
+                                    rowSpan={2}
+                                    className="p-3 py-2 border font-bold border-slate-300"
+                                    style={{ textAlign: "center" }}
+                                >
+                                    Taxable <br />
+                                    Value
+                                </td>
+                                <td
+                                    colSpan={2}
+                                    className="p-3 py-2 border font-bold border-slate-300"
+                                    style={{ textAlign: "center" }}
+                                >
+                                    <p className="s4">CGST</p>
+                                </td>
+                                <td
+                                    colSpan={2}
+                                    className="p-3 py-2 border font-bold border-slate-300"
+                                    style={{ textAlign: "center" }}
+                                >
+                                    <p className="s4">SGST/UTGST</p>
+                                </td>
+                                <td
+                                    rowSpan={2}
+                                    className="p-3 py-2 border font-bold border-slate-300"
+                                    style={{ textAlign: "center" }}
+                                >
+                                    Total <br /> Tax Amount
+                                    <span />
+                                </td>
+                            </tr>
+                            <tr className="bg-slate-100 text-[13px]  tracking-wider text-slate-700 text-left">
+                                <td className="p-3 py-2 border font-bold border-slate-300">
+                                    <p className="s3">Rate</p>
+                                </td>
+                                <td className="p-3 py-2 border font-bold border-slate-300">
+                                    <p className="s3">Amount</p>
+                                </td>
+                                <td className="p-3 py-2 border font-bold border-slate-300">
+                                    Rate
+                                </td>
+                                <td className="p-3 py-2 border font-bold border-slate-300">
+                                    Amount
+                                </td>
+                            </tr>
+                            <tr className="hover:bg-blue-50 transition-colors">
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    {formik.values.hsn_sac}
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    {formatIndianCurrency(grossTotal)}
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    {formik.values.cgst_percent}%
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    {formatIndianCurrency(cgst)}
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    {formik.values.sgst_percent}%
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    {formatIndianCurrency(sgst)}
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    {formatIndianCurrency(taxtotal)}
+                                </td>
+                            </tr>
+                            <tr className="hover:bg-blue-50 transition-colors">
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    <b>
+                                        Total
+                                    </b>
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    <b>{formatIndianCurrency(grossTotal)}</b>
+                                </td>
+                                <td style={{ width: "34pt", borderStyle: "solid", borderWidth: "1pt" }}>
 
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            <b>
-                                {formatIndianCurrency(cgst)}
-                            </b>
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            <p style={{ textIndent: "0pt", textAlign: "left" }}>
-                                <br />
-                            </p>
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            <b>
-                                {formatIndianCurrency(sgst)}
-                            </b>
-                        </td>
-                        <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
-                            <b>
-                                {formatIndianCurrency(taxtotal)}
-                            </b>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td
-                            colSpan={7}
-                            className="p-3 py-2 border text-left text-[13px] text-muted-foreground"
-                            style={{ borderBottom: 0 }}
-                        >
-                            Tax Amount (in words) :{" "}
-                            <b className="s1">
-                                {numberToWords(taxtotal)}
-                            </b>
-                        </td>
-                    </tr>
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    <b>
+                                        {formatIndianCurrency(cgst)}
+                                    </b>
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    <p style={{ textIndent: "0pt", textAlign: "left" }}>
+                                        <br />
+                                    </p>
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    <b>
+                                        {formatIndianCurrency(sgst)}
+                                    </b>
+                                </td>
+                                <td className="p-3 py-2 border text-right text-[13px] text-muted-foreground">
+                                    <b>
+                                        {formatIndianCurrency(taxtotal)}
+                                    </b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td
+                                    colSpan={7}
+                                    className="p-3 py-2 border text-left text-[13px] text-muted-foreground"
+                                    style={{ borderBottom: 0 }}
+                                >
+                                    Tax Amount (in words) :{" "}
+                                    <b className="s1">
+                                        {numberToWords(taxtotal)}
+                                    </b>
+                                </td>
+                            </tr>
+                        </>
+                    )}
                     <tr>
                         <td
                             colSpan={3}
@@ -1441,13 +1504,15 @@ function PreviewModeView({ formik, calculations, formatDate, numberToWords, esti
     );
 }
 
-function TaxRow({ label, name, percent, amount, enabled, onChange, onToggle, isDeduction = false }: any) {
+function TaxRow({ label, name, percent, amount, enabled, onChange, onToggle, isDeduction = false, disabled = false }: any) {
+    const effectiveEnabled = disabled ? false : enabled;
     return (
-        <div className={`flex items-center gap-2 group p-2 rounded-lg transition-all ${enabled ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-200/50 opacity-60'}`}>
+        <div className={`flex items-center gap-2 group p-2 rounded-lg transition-all ${effectiveEnabled ? 'bg-white shadow-sm ring-1 ring-slate-200' : 'bg-slate-200/50 opacity-60'}`}>
             <Checkbox
                 id={`toggle-${name}`}
-                checked={enabled}
+                checked={effectiveEnabled}
                 onCheckedChange={(val) => onToggle(`is_${name}_enabled`, !!val)}
+                disabled={disabled}
                 className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
             />
             <div className="flex-1 grid grid-cols-2 gap-2 items-center">
@@ -1459,12 +1524,12 @@ function TaxRow({ label, name, percent, amount, enabled, onChange, onToggle, isD
                             name={`${name}_percent`}
                             value={percent}
                             onChange={onChange}
-                            disabled={!enabled}
+                            disabled={!effectiveEnabled}
                             className="h-7 w-12 text-[10px] p-1 text-center font-bold border-slate-200 focus:ring-1 pr-3"
                         />
                         <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[8px] font-bold text-slate-400">%</span>
                     </div>
-                    <div className={`text-right flex-1 text-xs font-black ${enabled ? (isDeduction ? 'text-red-500' : 'text-blue-600') : 'text-slate-400'}`}>
+                    <div className={`text-right flex-1 text-xs font-black ${effectiveEnabled ? (isDeduction ? 'text-red-500' : 'text-blue-600') : 'text-slate-400'}`}>
                         {isDeduction ? '-' : '+'} ₹{formatIndianCurrency(amount)}
                     </div>
                 </div>

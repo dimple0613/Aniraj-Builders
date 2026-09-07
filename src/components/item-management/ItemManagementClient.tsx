@@ -62,6 +62,7 @@ interface ItemManagement {
     unit_id: string;
     ay_id?: string;
     group_id?: string;
+    item_type?: string;
     group?: SORGroupType | null;
     work_type: boolean;
     unit: Unit;
@@ -106,6 +107,7 @@ export default function ItemManagementClient() {
         enabledWorkTypes: {},
         updateAllVardhis: {},
         group_id: '',
+        item_type: 'Supplier',
     });
     const [formLoading, setFormLoading] = useState(false);
     const [confirmVardhiWorkType, setConfirmVardhiWorkType] = useState<string | null>(null);
@@ -239,6 +241,7 @@ export default function ItemManagementClient() {
                 unit_id: formData.unit_id,
                 ay_id: formData.ay_id || null,
                 group_id: formData.group_id || null,
+                item_type: formData.item_type || 'Supplier',
                 workTypePrices,
                 searchPreferences: formData.searchPreferences,
             };
@@ -291,6 +294,7 @@ export default function ItemManagementClient() {
             enabledWorkTypes,
             updateAllVardhis: {},
             group_id: item.group_id || '',
+            item_type: item.item_type || 'Supplier',
         });
         setModalOpen(true);
     };
@@ -332,6 +336,7 @@ export default function ItemManagementClient() {
             enabledWorkTypes: {},
             updateAllVardhis: {},
             group_id: '',
+            item_type: 'Supplier',
         });
         setSearchPrefInput('');
     };
@@ -690,6 +695,21 @@ export default function ItemManagementClient() {
                                 placeholder="Select group"
                                 options={groups.map((g: any) => ({ label: g.name, value: g.id }))}
                                 onAddNew={handleCreateGroup}
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                        <div className="space-y-2 relative">
+                            <Label>Item Type</Label>
+                            <InlineSelect
+                                value={formData.item_type}
+                                onChange={(value: any) => setFormData({ ...formData, item_type: value })}
+                                placeholder="Select item type"
+                                disableClear
+                                options={[
+                                    { label: 'Supplier', value: 'Supplier' },
+                                    { label: 'Labor', value: 'Labor' },
+                                ]}
                             />
                         </div>
                     </div>

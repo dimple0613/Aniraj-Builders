@@ -5,7 +5,6 @@ import { getServerSession, authOptions } from '@/lib/auth';
 import { sanitizeFilename } from '@/lib/validations/upload';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
-const ALLOWED_PDF_TYPES = ['application/pdf'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export const dynamic = 'force-dynamic';
@@ -29,8 +28,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
         }
 
-        if (!ALLOWED_IMAGE_TYPES.includes(file.type) && !ALLOWED_PDF_TYPES.includes(file.type)) {
-            return NextResponse.json({ error: 'Only JPG, PNG, and PDF files are allowed' }, { status: 400 });
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            return NextResponse.json({ error: 'Only JPG, JPEG and PNG images are allowed' }, { status: 400 });
         }
 
         const bytes = await file.arrayBuffer();
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
         const timestamp = Date.now();
         const randomSuffix = Math.random().toString(36).substring(2, 10);
         const sanitizedName = sanitizeFilename(file.name);
-        const ext = sanitizedName.split('.').pop()?.toLowerCase() || (file.type === 'application/pdf' ? 'pdf' : 'jpg');
+        const ext = sanitizedName.split('.').pop()?.toLowerCase() || 'jpg';
         const filename = `${timestamp}-${randomSuffix}.${ext}`;
         const filepath = join(uploadsDir, filename);
 

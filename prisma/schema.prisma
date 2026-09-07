@@ -924,6 +924,7 @@ model ItemManagement {
   unit_id               String
   ay_id                 String?
   group_id              String?                @map("group_id")
+  item_type             String                 @default("Supplier") @map("item_type")
   work_type             Boolean                @default(false)
   is_active             Boolean                @default(true)
   createdAt             DateTime               @default(now())

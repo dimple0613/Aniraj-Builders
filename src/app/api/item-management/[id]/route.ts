@@ -12,6 +12,7 @@ const FIELD_LABELS: Record<string, string> = {
     unit_id: 'Unit',
     ay_id: 'Financial Year',
     group_id: 'Group',
+    item_type: 'Item Type',
     work_type: 'Work Type',
     is_active: 'Active Status',
     workTypePrices: 'Work Type Prices',
@@ -49,6 +50,7 @@ const updateItemSchema = yup.object({
     unit_id: yup.string().min(1).optional(),
     ay_id: yup.string().required('Item number is required'),
     group_id: yup.string().nullable().optional(),
+    item_type: yup.string().oneOf(['Supplier', 'Labor']).optional(),
     work_type: yup.boolean().optional(),
     is_active: yup.boolean().optional(),
     workTypePrices: yup.array(yup.object({
@@ -127,7 +129,7 @@ export async function PUT(
                 throw new ValidationError(formatValidationErrors(err));
             });
 
-        const { item_name, unit_id, ay_id, group_id, work_type, is_active, workTypePrices, searchPreferences } = validation;
+        const { item_name, unit_id, ay_id, group_id, item_type, work_type, is_active, workTypePrices, searchPreferences } = validation;
 
         return await withCompany(async (company) => {
             const company_id = company?.company_id;
@@ -165,6 +167,7 @@ export async function PUT(
                 if (unit_id) updateData.unit_id = unit_id;
                 updateData.ay_id = ay_id;
                 if (group_id !== undefined) updateData.group_id = group_id || null;
+                if (item_type !== undefined) updateData.item_type = item_type;
                 if (work_type !== undefined) updateData.work_type = work_type;
                 if (is_active !== undefined) updateData.is_active = is_active;
 

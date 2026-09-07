@@ -70,6 +70,42 @@ interface InvoiceData {
     swift_code: string | null;
 }
 
+async function computeTaxDisabled(estimationId: string, companyId: string): Promise<boolean> {
+    const estimation = await prisma.vardhiEstimation.findFirst({
+        where: {
+            id: estimationId,
+            company_id: companyId,
+        },
+        include: {
+            items: {
+                include: {
+                    item: {
+                        select: { item_type: true },
+                    },
+                },
+            },
+        },
+    });
+
+    const estimateItems = estimation?.items || [];
+    const totalEstimateAmount = estimateItems.reduce(
+        (sum, it) => sum + (Number(it.amount) || 0),
+        0
+    );
+    const supplierAmount = estimateItems.reduce(
+        (sum, it) =>
+            it?.item?.item_type === 'Supplier'
+                ? sum + (Number(it.amount) || 0)
+                : sum,
+        0
+    );
+    const percentage =
+        totalEstimateAmount > 0
+            ? (supplierAmount / totalEstimateAmount) * 100
+            : 0;
+    return percentage <= 35;
+}
+
 export async function getInvoiceDataByEstimationId(estimationId: string, companyId: string): Promise<InvoiceData> {
     const invoice = await prisma.vardhiInvoice.findFirst({
         where: {
@@ -77,6 +113,10 @@ export async function getInvoiceDataByEstimationId(estimationId: string, company
             company_id: companyId,
         },
     });
+
+    // Match the Invoice Preview tax logic: when the Supplier Item percentage
+    // is <= 35% of the total estimate amount, all taxes are disabled.
+    const taxDisabled = await computeTaxDisabled(estimationId, companyId);
 
     if (invoice) {
         return {
@@ -105,26 +145,26 @@ export async function getInvoiceDataByEstimationId(estimationId: string, company
             quantity: Number(invoice.quantity),
             amount: Number(invoice.amount),
             cgst_percent: invoice.cgst_percent,
-            cgst_amount: invoice.cgst_amount ? Number(invoice.cgst_amount) : null,
+            cgst_amount: taxDisabled ? 0 : (invoice.cgst_amount ? Number(invoice.cgst_amount) : null),
             sgst_percent: invoice.sgst_percent,
-            sgst_amount: invoice.sgst_amount ? Number(invoice.sgst_amount) : null,
+            sgst_amount: taxDisabled ? 0 : (invoice.sgst_amount ? Number(invoice.sgst_amount) : null),
             it_percent: invoice.it_percent,
-            it_amount: invoice.it_amount ? Number(invoice.it_amount) : null,
+            it_amount: taxDisabled ? 0 : (invoice.it_amount ? Number(invoice.it_amount) : null),
             labour_cess_percent: invoice.labour_cess_percent,
-            labour_cess_amount: invoice.labour_cess_amount ? Number(invoice.labour_cess_amount) : null,
+            labour_cess_amount: taxDisabled ? 0 : (invoice.labour_cess_amount ? Number(invoice.labour_cess_amount) : null),
             cgst_tds_percent: invoice.cgst_tds_percent,
-            cgst_tds_amount: invoice.cgst_tds_amount ? Number(invoice.cgst_tds_amount) : null,
+            cgst_tds_amount: taxDisabled ? 0 : (invoice.cgst_tds_amount ? Number(invoice.cgst_tds_amount) : null),
             sgst_tds_percent: invoice.sgst_tds_percent,
-            sgst_tds_amount: invoice.sgst_tds_amount ? Number(invoice.sgst_tds_amount) : null,
+            sgst_tds_amount: taxDisabled ? 0 : (invoice.sgst_tds_amount ? Number(invoice.sgst_tds_amount) : null),
             add_deposit_percent: invoice.add_deposit_percent,
-            add_deposit_amount: invoice.add_deposit_amount ? Number(invoice.add_deposit_amount) : null,
-            is_cgst_enabled: invoice.is_cgst_enabled,
-            is_sgst_enabled: invoice.is_sgst_enabled,
-            is_it_enabled: invoice.is_it_enabled,
-            is_labour_cess_enabled: invoice.is_labour_cess_enabled,
-            is_cgst_tds_enabled: invoice.is_cgst_tds_enabled,
-            is_sgst_tds_enabled: invoice.is_sgst_tds_enabled,
-            is_add_deposit_enabled: invoice.is_add_deposit_enabled,
+            add_deposit_amount: taxDisabled ? 0 : (invoice.add_deposit_amount ? Number(invoice.add_deposit_amount) : null),
+            is_cgst_enabled: taxDisabled ? false : invoice.is_cgst_enabled,
+            is_sgst_enabled: taxDisabled ? false : invoice.is_sgst_enabled,
+            is_it_enabled: taxDisabled ? false : invoice.is_it_enabled,
+            is_labour_cess_enabled: taxDisabled ? false : invoice.is_labour_cess_enabled,
+            is_cgst_tds_enabled: taxDisabled ? false : invoice.is_cgst_tds_enabled,
+            is_sgst_tds_enabled: taxDisabled ? false : invoice.is_sgst_tds_enabled,
+            is_add_deposit_enabled: taxDisabled ? false : invoice.is_add_deposit_enabled,
             account_holder_name: invoice.account_holder_name,
             bank_name: invoice.bank_name,
             account_no: invoice.account_no,
@@ -201,25 +241,25 @@ export async function getInvoiceDataByEstimationId(estimationId: string, company
         quantity: quantityNum,
         amount: amountNum,
         cgst_percent: cgstPercent,
-        cgst_amount: cgstAmount,
+        cgst_amount: taxDisabled ? 0 : cgstAmount,
         sgst_percent: sgstPercent,
-        sgst_amount: sgstAmount,
+        sgst_amount: taxDisabled ? 0 : sgstAmount,
         it_percent: itPercent,
-        it_amount: itAmount,
+        it_amount: taxDisabled ? 0 : itAmount,
         labour_cess_percent: labourCessPercent,
-        labour_cess_amount: labourCessAmount,
+        labour_cess_amount: taxDisabled ? 0 : labourCessAmount,
         cgst_tds_percent: cgstTdsPercent,
-        cgst_tds_amount: cgstTdsAmount,
+        cgst_tds_amount: taxDisabled ? 0 : cgstTdsAmount,
         sgst_tds_percent: sgstTdsPercent,
-        sgst_tds_amount: sgstTdsAmount,
+        sgst_tds_amount: taxDisabled ? 0 : sgstTdsAmount,
         add_deposit_percent: addDepositPercent,
-        add_deposit_amount: addDepositAmount,
-        is_cgst_enabled: true,
-        is_sgst_enabled: true,
-        is_it_enabled: true,
-        is_labour_cess_enabled: true,
-        is_cgst_tds_enabled: true,
-        is_sgst_tds_enabled: true,
+        add_deposit_amount: taxDisabled ? 0 : addDepositAmount,
+        is_cgst_enabled: taxDisabled ? false : true,
+        is_sgst_enabled: taxDisabled ? false : true,
+        is_it_enabled: taxDisabled ? false : true,
+        is_labour_cess_enabled: taxDisabled ? false : true,
+        is_cgst_tds_enabled: taxDisabled ? false : true,
+        is_sgst_tds_enabled: taxDisabled ? false : true,
         is_add_deposit_enabled: false,
         account_holder_name: company.account_holder_name || null,
         bank_name: company.bank_name || null,
@@ -264,6 +304,14 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
     const netPayable = Number((subtotal - totalDeductions).toFixed(2));
     const roundedNetAmount = Math.round(netPayable);
 
+    const hasGst = is_cgst_enabled || is_sgst_enabled;
+    const hasDeductions =
+        is_it_enabled ||
+        is_labour_cess_enabled ||
+        is_cgst_tds_enabled ||
+        is_sgst_tds_enabled ||
+        is_add_deposit_enabled;
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -292,18 +340,21 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
     <div class="invoice-wrapper">
         <h2 class="text-[19px] text-center text-xl md:text-2xl font-semibold tracking-tight mb-[5px]">Tax Invoice </h2>
         <table>
+            <colgroup>
+                <col style="width:10.6%" />
+                <col style="width:22.3%" />
+                <col style="width:8.7%" />
+                <col style="width:13.6%" />
+                <col style="width:11.5%" />
+                <col style="width:10.8%" />
+                <col style="width:22.3%" />
+            </colgroup>
             <tbody>
                 <tr class="text-[12px] tracking-wider text-slate-700 text-left ">
                     <td class="border border-slate-300"  style="vertical-align:baseline" colSpan="3">
-                        <div class="flex items-start p-1 border-slate-300 gap-1">
-                            <!-- Left-side image -->
-                            <div class="flex-shrink-0">
-                                <img src="${origin}/logo.png" alt="Company Logo" class="w-20 h-20 object-cover rounded" />
-                            </div>
-
+                        <div class="p-1 border-slate-300">
                             <!-- Company info -->
-                            <div>
-                                <b >${company_name || ''}</b>
+                            <b >${company_name || ''}</b>
                                 <br />
                                 <p   style="white-space:break-spaces">${company_address || ''}</p>
                                 GSTIN/UIN: ${company_gstin || ''}
@@ -311,7 +362,6 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
                                 State Name: ${company_state || ''}, Code: ${company_state_code || ''}
                                 <br />
                                 Contact: ${company_contact || ''}
-                            </div>
                         </div>
                         <hr  style="margin-left:-1px;margin-right:-1px;border-bottom:1px" class="border-b border-slate-300" />
                         <div class="p-1 border-slate-300">
@@ -366,7 +416,7 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
                     </td>
                 </tr>
                 <tr class="bg-slate-100 text-[12px] tracking-wider text-slate-700 text-left">
-                    <th class="p-1 border font-bold border-slate-300">Sl No.</th>
+                    <th class="p-1 border font-bold border-slate-300">Sr No.</th>
                     <th colSpan="3" class="p-1 border font-bold border-slate-300">
                         Description of Services
                     </th>
@@ -438,6 +488,7 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
                         <div class="p-1 h-full border-r border-slate-300"><b>₹${formatIndianCurrency(subtotal)}</b></div>
                     </td>
                 </tr>
+                ${hasDeductions ? `
                 <tr class=" hover:bg-blue-50 transition-colors">
                     <td class="p-1 py-1 border text-left text-[12px] text-muted-foreground">
                         <p><br /></p>
@@ -455,6 +506,7 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
                       <div class="p-1 h-full border-r  border-slate-300 ">  <br /></div>
                     </td>
                 </tr>
+                ` : ''}
                 ${is_it_enabled ? `
                 <tr class="hover:bg-blue-50 transition-colors">
                     <td class="p-1 py-1 border text-left text-[12px] text-muted-foreground"></td>
@@ -549,20 +601,21 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
                         </div>
                     </td>
                 </tr>
+                ${hasGst ? `
                 <tr class="bg-slate-100  text-[12px] tracking-wider text-slate-700 text-left">
-                    <td class="p-1 py-1 border font-bold border-slate-300 w-[8%]" rowSpan=2" style="text-align:center">
+                    <td class="p-1 py-1 border font-bold border-slate-300 " rowSpan=2" style="text-align:center">
                         <b>HSN/SAC</b>
                     </td>
-                    <td rowSpan=2" class="p-1 py-1 border font-bold border-slate-300 w-[18%]" style="text-align:center">
+                    <td rowSpan=2" class="p-1 py-1 border font-bold border-slate-300 " style="text-align:center">
                         Taxable <br /> Value
                     </td>
-                    <td colSpan="2" class="p-1 py-1 border font-bold border-slate-300 w-[18%]" style="text-align:center">
+                    <td colSpan="2" class="p-1 py-1 border font-bold border-slate-300 " style="text-align:center">
                         <b>CGST</b>
                     </td>
-                    <td colSpan="2" class="p-1 py-1 border font-bold border-slate-300 w-[18%]" style="text-align:center">
+                    <td colSpan="2" class="p-1 py-1 border font-bold border-slate-300 " style="text-align:center">
                         <b>SGST/UTGST</b>
                     </td>
-                    <td rowSpan=2" class="border font-bold border-slate-300 w-[18%]" style="text-align:center">
+                    <td rowSpan=2" class="border font-bold border-slate-300 " style="text-align:center">
                         <div class="p-1 h-full border-r  border-slate-300 "> Total <br /> Tax Amount </div>
                     </td>
                 </tr>
@@ -595,6 +648,7 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, origin: any):
                         <div class="p-1 h-full border-r  border-slate-300 ">Tax Amount (in words) : <b>${numberToWords(taxtotal)}</b></div>
                     </td>
                 </tr>
+                ` : ''}
                 <tr>
                     <td colSpan="3" class="p-1 py-1 border text-left text-[12px] text-muted-foreground" style="border-top:0;border-right:0;border-bottom:0" />
                     <td colSpan="4" style="border-bottom:0;border-top:0;border-left:0" class="border text-left text-[12px] text-muted-foreground">

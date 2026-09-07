@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -81,10 +81,38 @@ const attachmentTypes = [
 
 const inputClassName = "border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 flex items-center justify-between gap-1.5 rounded-lg py-2 pr-2 pl-2.5 whitespace-nowrap transition-colors outline-none select-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:ring-3 data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 w-full border-0 bg-transparent shadow-none focus-visible:ring-1 h-8 text-xs";
 
+function buildSequenceNumberMap(vardhis: Vardhi[]): Record<string, number> {
+    const sequence: Record<string, number> = {};
+    const byYear = new Map<number, Vardhi[]>();
+
+    vardhis.forEach((v) => {
+        const year = new Date(v.date).getFullYear();
+        if (!byYear.has(year)) byYear.set(year, []);
+        byYear.get(year)!.push(v);
+    });
+
+    byYear.forEach((group) => {
+        group.sort((a, b) => {
+            const dateDiff = new Date(a.date).getTime() - new Date(b.date).getTime();
+            if (dateDiff !== 0) return dateDiff;
+            return String(a.vardhi_number).localeCompare(String(b.vardhi_number));
+        });
+        group.forEach((v, index) => {
+            sequence[v.id] = index + 1;
+        });
+    });
+
+    return sequence;
+}
+
 export default function BillTrackingView({ data, estimation }: Props) {
     const getVardhiItems = (vardhiId: string): VardhiItem[] => {
         return data.items.filter((item) => item.vardhi_id === vardhiId);
     };
+    const sequenceNumberMap = useMemo(
+        () => buildSequenceNumberMap(data.vardhis || []),
+        [data.vardhis]
+    );
     const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
     const [selectedVardhiForAttachment, setSelectedVardhiForAttachment] =
         useState<{ id: string; vardhi_number?: string; type?: string } | null>(null);
@@ -180,7 +208,12 @@ export default function BillTrackingView({ data, estimation }: Props) {
                                             <React.Fragment key={vardhi.id}>
                                                 <tr className="bg-slate-200 font-semibold border-b-2 border-slate-300">
                                                     <td className="p-2 border-r border-slate-300  w-[20%]" >
-                                                        <Badge variant="secondary" className="font-mono">{vardhi.vardhi_number}</Badge>
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <Badge variant="outline" className="font-mono text-xs w-fit">{vardhi.vardhi_number}</Badge>
+                                                            {sequenceNumberMap[vardhi.id] != null && (
+                                                                <Badge variant="outline" className="font-mono text-xs w-fit">{sequenceNumberMap[vardhi.id]}</Badge>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="p-2 border-r border-slate-300" colSpan={3}>
                                                         <div className="flex items-center gap-1 justify-between">

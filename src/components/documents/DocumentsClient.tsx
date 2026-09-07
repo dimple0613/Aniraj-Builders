@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DocumentPreviewModal } from '@/components/hr/employees/DocumentPreviewModal';
+import { DocumentBulkPrint } from '@/components/documents/DocumentBulkPrint';
 import { toDateInputValue, formatDateDisplay } from '@/lib/date-utils';
 import { Upload, Eye, X, Loader2, FileText, Image as ImageIcon } from 'lucide-react';
 import { Labels } from '../ui/labels';
@@ -56,7 +57,7 @@ interface UploadedFileInfo {
 }
 
 const NAME_MAX = 200;
-const ALLOWED_FILE_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png'];
+const ALLOWED_FILE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 const documentValidationSchema = Yup.object({
@@ -123,6 +124,7 @@ export function DocumentsClient({ canCreate = true, canEdit = true, canDelete = 
     const [uploadedFile, setUploadedFile] = useState<UploadedFileInfo | null>(null);
     const [uploading, setUploading] = useState(false);
     const [previewDoc, setPreviewDoc] = useState<{ url: string; name: string } | null>(null);
+    const [selectedDocs, setSelectedDocs] = useState<DocumentRecord[]>([]);
     const [pagination, setPagination] = useState<PaginationInfo>({
         page: 1,
         pages: 1,
@@ -166,7 +168,7 @@ export function DocumentsClient({ canCreate = true, canEdit = true, canDelete = 
     const handleFileSelect = async (file: File) => {
         const ext = getFileExtension(file.name);
         if (!ALLOWED_FILE_EXTENSIONS.includes(ext)) {
-            toast.error('Only PDF, JPG, JPEG and PNG files are allowed');
+            toast.error('Only JPG, JPEG and PNG files are allowed');
             return;
         }
         if (file.size > MAX_FILE_SIZE) {
@@ -385,9 +387,15 @@ export function DocumentsClient({ canCreate = true, canEdit = true, canDelete = 
 
     return (
         <div className="h-full flex flex-col gap-4 md:gap-6  w-full overflow-hidden">
-            <div className="shrink-0">
-                <h2 className="text-xl md:text-2xl font-semibold tracking-tight">Documents</h2>
-                <p className="text-muted-foreground text-sm">Manage project documents with expiry reminders</p>
+            <div className="shrink-0 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 className="text-xl md:text-2xl font-semibold tracking-tight">Documents</h2>
+                    <p className="text-muted-foreground text-sm">Manage project documents with expiry reminders</p>
+                </div>
+                <DocumentBulkPrint
+                    documents={selectedDocs}
+                    disabled={selectedDocs.length === 0}
+                />
             </div>
 
             <DataTable
@@ -411,6 +419,9 @@ export function DocumentsClient({ canCreate = true, canEdit = true, canDelete = 
                 onDelete={canDelete ? (item) => setDeleteItem(item) : undefined}
                 searchPlaceholder="Search documents..."
                 addLabel="Add Document"
+                selectable
+                onSelect={(items) => setSelectedDocs(items)}
+                selectedItems={selectedDocs}
             />
 
             <FormModal
@@ -515,28 +526,30 @@ export function DocumentsClient({ canCreate = true, canEdit = true, canDelete = 
 					<div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                     <div className="space-y-2 relative">
                         <Label htmlFor="doc_file">Document File {!editingItem && '*'}</Label>
-                        <div className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+                        <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2 items-center">
                             <label
                                 htmlFor="doc_file"
-                                title="Upload PDF or image"
-                                className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm text-muted-foreground transition-colors hover:border-primary hover:bg-muted hover:text-primary"
+                                title="Upload an image"
+                                className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-primary hover:bg-muted hover:text-primary"
                             >
-                                {uploading ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Upload className="h-4 w-4" />
-                                )}
-                                <span className="truncate">
+                                <span className="shrink-0">
+                                    {uploading ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Upload className="h-4 w-4" />
+                                    )}
+                                </span>
+                                <span className="min-w-0 break-words leading-snug">
                                     {uploading
                                         ? 'Uploading...'
                                         : uploadedFile
                                           ? uploadedFile.name
-                                          : 'Upload PDF or image (JPG, JPEG, PNG - max 5MB)'}
+                                          : 'Upload image (JPG, JPEG, PNG - max 5MB)'}
                                 </span>
                                 <input
                                     id="doc_file"
                                     type="file"
-                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    accept=".jpg,.jpeg,.png"
                                     className="hidden"
                                     disabled={uploading}
                                     onChange={(e) => {

@@ -33,6 +33,7 @@ interface InlineSelectProps {
     multiple?: boolean;
     onBlur?: (e: React.FocusEvent) => void;
     error?: boolean;
+    disableClear?: boolean;
 }
 
 export function InlineSelect({
@@ -49,6 +50,7 @@ export function InlineSelect({
     multiple = false,
     onBlur,
     error = false,
+    disableClear = false,
 }: InlineSelectProps) {
     const [isAdding, setIsAdding] = useState(false);
     const [newValue, setNewValue] = useState('');
@@ -234,7 +236,7 @@ export function InlineSelect({
                                     <span className="font-medium">{addNewLabel}</span>
                                 </div>
                             )}
-                            {!multiple && selectedValues.length > 0 && (
+                            {!multiple && !disableClear && selectedValues.length > 0 && (
                                 <SelectItem value="__clear__" className="text-muted-foreground">
                                     Clear Selection
                                 </SelectItem>

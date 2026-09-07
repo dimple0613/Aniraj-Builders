@@ -1,4 +1,4 @@
-import { getInvoiceByEstimation } from "@/app/actions/vardhi-invoice-actions";
+import { getInvoiceByEstimation, getVardhiEstimationForInvoice } from "@/app/actions/vardhi-invoice-actions";
 import { formatIndianCurrency } from "@/lib/tax-utils";
 import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/financial-year";
@@ -23,6 +23,24 @@ export default async function VardhiInvoicePrintPage({ params }: Props) {
         return notFound();
     }
 
+    // Match the Invoice Preview tax logic: when the Supplier Item percentage
+    // is <= 35% of the total estimate amount, all taxes are disabled.
+    const estimation = await getVardhiEstimationForInvoice(estimationId);
+    const estimateItems = estimation?.items || [];
+    const totalEstimateAmount = estimateItems.reduce(
+        (sum: number, it: any) => sum + (Number(it.amount) || 0),
+        0
+    );
+    const supplierAmount = estimateItems.reduce(
+        (sum: number, it: any) =>
+            it?.item?.item_type === 'Supplier'
+                ? sum + (Number(it.amount) || 0)
+                : sum,
+        0
+    );
+    const taxDisabled =
+        totalEstimateAmount > 0 && (supplierAmount / totalEstimateAmount) * 100 <= 35;
+
     const {
         invoice_no, invoice_date, dept_name, ra_bill_no, mb_no, mb_page_no,
         company_name, company_address, company_gstin, company_state, company_state_code, company_contact,
@@ -37,21 +55,36 @@ export default async function VardhiInvoicePrintPage({ params }: Props) {
         account_holder_name, bank_name, account_no, branch_ifsc, swift_code
     } = invoice;
 
+    const cgstFlag = taxDisabled ? false : is_cgst_enabled;
+    const sgstFlag = taxDisabled ? false : is_sgst_enabled;
+    const itFlag = taxDisabled ? false : is_it_enabled;
+    const labourCessFlag = taxDisabled ? false : is_labour_cess_enabled;
+    const cgstTdsFlag = taxDisabled ? false : is_cgst_tds_enabled;
+    const sgstTdsFlag = taxDisabled ? false : is_sgst_tds_enabled;
+    const addDepositFlag = taxDisabled ? false : is_add_deposit_enabled;
+
     const quantityNum = Number(quantity);
     const amountNum = Number(amount);
     const subtotal = amountNum * quantityNum;
-    const cgst = is_cgst_enabled ? Number(cgst_amount) : 0;
-    const sgst = is_sgst_enabled ? Number(sgst_amount) : 0;
+    const cgst = cgstFlag ? Number(cgst_amount) : 0;
+    const sgst = sgstFlag ? Number(sgst_amount) : 0;
     const grossTotal = Number((subtotal - cgst - sgst).toFixed(2));
 
-    const it = is_it_enabled ? Number(it_amount) : 0;
-    const labourCess = is_labour_cess_enabled ? Number(labour_cess_amount) : 0;
-    const cgstTds = is_cgst_tds_enabled ? Number(cgst_tds_amount) : 0;
-    const sgstTds = is_sgst_tds_enabled ? Number(sgst_tds_amount) : 0;
-    const addDeposit = is_add_deposit_enabled ? Number(add_deposit_amount) : 0;
+    const it = itFlag ? Number(it_amount) : 0;
+    const labourCess = labourCessFlag ? Number(labour_cess_amount) : 0;
+    const cgstTds = cgstTdsFlag ? Number(cgst_tds_amount) : 0;
+    const sgstTds = sgstTdsFlag ? Number(sgst_tds_amount) : 0;
+    const addDeposit = addDepositFlag ? Number(add_deposit_amount) : 0;
 
     const totalDeductions = Number((it + labourCess + cgstTds + sgstTds + addDeposit).toFixed(2));
     const netPayable = Number((subtotal - totalDeductions).toFixed(2));
+
+    const hasDeductions =
+        itFlag ||
+        labourCessFlag ||
+        cgstTdsFlag ||
+        sgstTdsFlag ||
+        addDepositFlag;
 
     return (
         <div className="bg-white min-h-screen p-0 md:p-8 font-serif text-slate-900 print:p-0">
@@ -175,13 +208,13 @@ export default async function VardhiInvoicePrintPage({ params }: Props) {
                                 <span>Sub Total:</span>
                                 <span className="font-bold">₹{formatIndianCurrency(subtotal)}</span>
                             </div>
-                            {is_cgst_enabled && (
+                            {cgstFlag && (
                                 <div className="flex justify-between text-xs">
                                     <span>CGST ({cgst_percent}%):</span>
                                     <span>₹{formatIndianCurrency(cgst)}</span>
                                 </div>
                             )}
-                            {is_sgst_enabled && (
+                            {sgstFlag && (
                                 <div className="flex justify-between text-xs">
                                     <span>SGST ({sgst_percent}%):</span>
                                     <span>₹{formatIndianCurrency(sgst)}</span>
@@ -192,39 +225,41 @@ export default async function VardhiInvoicePrintPage({ params }: Props) {
                                 <span>₹{formatIndianCurrency(grossTotal)}</span>
                             </div>
 
-                            <div className="py-2 space-y-1 opacity-80 border-b border-slate-200">
-                                <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Deductions</h4>
-                                {is_it_enabled && (
-                                    <div className="flex justify-between text-xs">
-                                        <span>Income Tax ({it_percent}%):</span>
-                                        <span>- ₹{formatIndianCurrency(it)}</span>
-                                    </div>
-                                )}
-                                {is_labour_cess_enabled && (
-                                    <div className="flex justify-between text-xs">
-                                        <span>Labour Cess ({labour_cess_percent}%):</span>
-                                        <span>- ₹{formatIndianCurrency(labourCess)}</span>
-                                    </div>
-                                )}
-                                {is_cgst_tds_enabled && (
-                                    <div className="flex justify-between text-xs">
-                                        <span>CGST (TDS) ({cgst_tds_percent}%):</span>
-                                        <span>- ₹{formatIndianCurrency(cgstTds)}</span>
-                                    </div>
-                                )}
-                                {is_sgst_tds_enabled && (
-                                    <div className="flex justify-between text-xs">
-                                        <span>SGST (TDS) ({sgst_tds_percent}%):</span>
-                                        <span>- ₹{formatIndianCurrency(sgstTds)}</span>
-                                    </div>
-                                )}
-                                {is_add_deposit_enabled && (
-                                    <div className="flex justify-between text-xs">
-                                        <span>Add. Deposit ({add_deposit_percent}%):</span>
-                                        <span>- ₹{formatIndianCurrency(addDeposit)}</span>
-                                    </div>
-                                )}
-                            </div>
+                            {hasDeductions && (
+                                <div className="py-2 space-y-1 opacity-80 border-b border-slate-200">
+                                    <h4 className="text-[9px] font-black uppercase tracking-widest text-slate-400">Deductions</h4>
+                                    {itFlag && (
+                                        <div className="flex justify-between text-xs">
+                                            <span>Income Tax ({it_percent}%):</span>
+                                            <span>- ₹{formatIndianCurrency(it)}</span>
+                                        </div>
+                                    )}
+                                    {labourCessFlag && (
+                                        <div className="flex justify-between text-xs">
+                                            <span>Labour Cess ({labour_cess_percent}%):</span>
+                                            <span>- ₹{formatIndianCurrency(labourCess)}</span>
+                                        </div>
+                                    )}
+                                    {cgstTdsFlag && (
+                                        <div className="flex justify-between text-xs">
+                                            <span>CGST (TDS) ({cgst_tds_percent}%):</span>
+                                            <span>- ₹{formatIndianCurrency(cgstTds)}</span>
+                                        </div>
+                                    )}
+                                    {sgstTdsFlag && (
+                                        <div className="flex justify-between text-xs">
+                                            <span>SGST (TDS) ({sgst_tds_percent}%):</span>
+                                            <span>- ₹{formatIndianCurrency(sgstTds)}</span>
+                                        </div>
+                                    )}
+                                    {addDepositFlag && (
+                                        <div className="flex justify-between text-xs">
+                                            <span>Add. Deposit ({add_deposit_percent}%):</span>
+                                            <span>- ₹{formatIndianCurrency(addDeposit)}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="flex justify-between pt-4 pb-2 font-black text-2xl">
                                 <span className="text-sm self-end pb-1 opacity-60">NET PAYABLE:</span>
