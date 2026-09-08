@@ -147,6 +147,24 @@ export function PayableReport() {
         setLimit(newLimit);
     };
 
+    const handleStartDateChange = (value: string) => {
+        setStartDate(value);
+        if (value) {
+            setSelectedMonth(value.substring(0, 7));
+        } else if (!endDate) {
+            setSelectedMonth('');
+        }
+    };
+
+    const handleEndDateChange = (value: string) => {
+        setEndDate(value);
+        if (value && !startDate) {
+            setSelectedMonth(value.substring(0, 7));
+        } else if (!value && !startDate) {
+            setSelectedMonth('');
+        }
+    };
+
     const handleExport = () => {
         const csvContent = generateCSV();
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -307,7 +325,7 @@ export function PayableReport() {
                                 type="date"
                                 className='inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-[32px] border-dashed gap-1.5'
                                 value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
+                                onChange={(e) => handleStartDateChange(e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
@@ -315,7 +333,7 @@ export function PayableReport() {
                                 type="date"
                                 className='inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-md px-3 text-xs h-[32px] border-dashed gap-1.5'
                                 value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
+                                onChange={(e) => handleEndDateChange(e.target.value)}
                             />
                         </div>
                         {(selectedParty.length > 0 || selectedProject.length > 0 || selectedMonth || startDate || endDate) && (
